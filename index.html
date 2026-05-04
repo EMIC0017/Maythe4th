@@ -360,6 +360,25 @@
     font-family: 'Orbitron', sans-serif; font-size: 9px; color: var(--sw-green);
     letter-spacing: .15em; pointer-events: none;
   }
+  /* Laser blast + score feedback */
+  .laser {
+    position: fixed; height: 3px; pointer-events: none; z-index: 99;
+    transform-origin: 0 50%; border-radius: 2px;
+    animation: laserFade .25s ease-out forwards;
+  }
+  @keyframes laserFade { 0% { opacity: 1; } 100% { opacity: 0; } }
+  .blast-pts {
+    position: fixed; pointer-events: none; z-index: 100;
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 16px;
+    letter-spacing: .15em; text-shadow: 0 0 12px currentColor;
+    animation: blastPts 1.4s ease-out forwards;
+  }
+  @keyframes blastPts {
+    0%   { opacity: 0; transform: translate(-50%, 0) scale(.6); }
+    20%  { opacity: 1; transform: translate(-50%, -40px) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -90px) scale(1); }
+  }
+  .blast-pts.miss { color: #ff4757; font-size: 13px; }
 
   /* Star Wars name generator */
   .namegen {
@@ -1473,14 +1492,15 @@ window.clearLeaderboard = function() {
 function renderLeaderboard() {
   show('screen-leader');
   const board = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
+  const bonus = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
   const light = board.filter(e => e.side === 'light').sort(sortBy);
   const dark  = board.filter(e => e.side === 'dark').sort(sortBy);
   fillTable('table-light', light);
   fillTable('table-dark',  dark);
-  const totalLight = light.reduce((s, e) => s + e.score, 0);
-  const totalDark  = dark .reduce((s, e) => s + e.score, 0);
-  $('total-light').textContent = totalLight.toLocaleString();
-  $('total-dark').textContent  = totalDark.toLocaleString();
+  const totalLight = light.reduce((s, e) => s + e.score, 0) + (bonus.light || 0);
+  const totalDark  = dark .reduce((s, e) => s + e.score, 0) + (bonus.dark  || 0);
+  $('total-light').textContent = totalLight.toLocaleString() + (bonus.light ? ` (+${bonus.light} blast)` : '');
+  $('total-dark').textContent  = totalDark.toLocaleString()  + (bonus.dark  ? ` (+${bonus.dark} blast)`  : '');
   $('count-light').textContent = light.length;
   $('count-dark').textContent  = dark.length;
   let banner = '— Awaiting challengers —';
@@ -1546,29 +1566,42 @@ const SHIP_SVGS = {
     <line x1="20" y1="25" x2="80" y2="25" stroke="#666" stroke-width=".5"/>
   </svg>`,
   deathstar: `<svg viewBox="0 0 110 110" width="100%" height="100%">
-    <defs>
-      <radialGradient id="dsfly-${Math.random().toString(36).slice(2,8)}" cx="38%" cy="38%">
-        <stop offset="0" stop-color="#ccc"/><stop offset="1" stop-color="#2a2a2a"/>
-      </radialGradient>
-    </defs>
     <circle cx="55" cy="55" r="50" fill="#888" stroke="#222" stroke-width="1.5"/>
-    <circle cx="55" cy="55" r="50" fill="url(#dsfly)" opacity=".9"/>
     <circle cx="36" cy="36" r="12" fill="#1a1a1a"/>
     <circle cx="36" cy="36" r="5" fill="#000"/>
     <line x1="6" y1="55" x2="104" y2="55" stroke="#222" stroke-width="1"/>
     <line x1="14" y1="40" x2="96" y2="40" stroke="#3a3a3a" stroke-width=".5"/>
     <line x1="14" y1="70" x2="96" y2="70" stroke="#3a3a3a" stroke-width=".5"/>
+  </svg>`,
+  // Alduron — Rebel capital cruiser (made-up name from Eric)
+  alduron: `<svg viewBox="0 0 160 60" width="100%" height="100%">
+    <path d="M4 30 Q14 12 70 10 L140 16 Q156 26 156 30 Q156 34 140 44 L70 50 Q14 48 4 30 Z" fill="#dcdcdc" stroke="#666" stroke-width="1.2"/>
+    <path d="M30 22 L120 20 L120 40 L30 38 Z" fill="#bbb" opacity=".6"/>
+    <ellipse cx="115" cy="26" rx="14" ry="4" fill="#999" stroke="#444" stroke-width=".8"/>
+    <circle cx="111" cy="26" r="1.5" fill="#4FC3F7"/>
+    <circle cx="119" cy="26" r="1.5" fill="#4FC3F7"/>
+    <circle cx="6" cy="30" r="5" fill="#ff7043" opacity=".9"/>
+    <circle cx="11" cy="22" r="3" fill="#ff7043" opacity=".7"/>
+    <circle cx="11" cy="38" r="3" fill="#ff7043" opacity=".7"/>
+    <text x="75" y="36" text-anchor="middle" fill="#FF3D00" font-size="16" font-weight="900" font-family="Orbitron">★</text>
+    <line x1="40" y1="30" x2="100" y2="30" stroke="#888" stroke-width=".5"/>
   </svg>`
 };
 
 const SHIP_TYPES = [
-  // weighted by spawn probability
-  { type: 'tie',       size: 50,  hp: 1, dur: 14, weight: 5 },
-  { type: 'tie',       size: 38,  hp: 1, dur: 18, weight: 3 },
-  { type: 'xwing',     size: 60,  hp: 1, dur: 16, weight: 4 },
-  { type: 'destroyer', size: 100, hp: 2, dur: 30, weight: 1 },
-  { type: 'deathstar', size: 130, hp: 3, dur: 90, weight: 1 }
+  // weighted by spawn probability — capital ships made rare
+  { type: 'tie',       size: 50,  hp: 1, dur: 14, weight: 8 },
+  { type: 'tie',       size: 38,  hp: 1, dur: 18, weight: 6 },
+  { type: 'xwing',     size: 60,  hp: 1, dur: 16, weight: 7 },
+  { type: 'destroyer', size: 100, hp: 2, dur: 30, weight: 0.4 },
+  { type: 'deathstar', size: 130, hp: 3, dur: 90, weight: 0.18 },
+  { type: 'alduron',   size: 130, hp: 3, dur: 80, weight: 0.18 }
 ];
+
+// Faction map (which side the ship belongs to). Blasting it scores for the OPPOSITE side.
+const SHIP_FACTION = { tie: 'dark', destroyer: 'dark', deathstar: 'dark', xwing: 'light', alduron: 'light' };
+// Bonus points awarded to the opposite side when destroyed
+const SHIP_POINTS  = { tie: 1, xwing: 1, destroyer: 2, deathstar: 3, alduron: 3 };
 
 function pickShipType() {
   const total = SHIP_TYPES.reduce((s, t) => s + t.weight, 0);
@@ -1577,16 +1610,92 @@ function pickShipType() {
   return SHIP_TYPES[0];
 }
 
-let _deathStarOnScreen = false;
+let _capitalOnScreen = false;
+const CAPITAL = new Set(['destroyer', 'deathstar', 'alduron']);
+
+/* Laser blast from cursor — sometimes misses */
+const MISS_CHANCE = 0.18;
+function drawLaser(fromX, fromY, toX, toY, color) {
+  const dx = toX - fromX, dy = toY - fromY;
+  const len = Math.hypot(dx, dy);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  const laser = document.createElement('div');
+  laser.className = 'laser';
+  laser.style.cssText = `
+    left: ${fromX}px; top: ${fromY - 1}px;
+    width: ${len}px;
+    background: linear-gradient(to right, transparent 0%, ${color} 8%, #fff 50%, ${color} 92%, transparent 100%);
+    box-shadow: 0 0 8px ${color}, 0 0 16px ${color};
+    transform: rotate(${angle}deg);
+  `;
+  document.body.appendChild(laser);
+  setTimeout(() => laser.remove(), 260);
+}
+function shoot(e, ship) {
+  const fromX = e.clientX, fromY = e.clientY;
+  const rect = ship.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  // Faction laser color: green for shots at Imperial, red for shots at Rebel
+  const color = SHIP_FACTION[ship._type] === 'dark' ? '#76FF03' : '#FF3D00';
+  const isMiss = Math.random() < MISS_CHANCE;
+  let toX = cx, toY = cy;
+  if (isMiss) {
+    // Skew the laser past the ship by a visible margin
+    const dx = cx - fromX, dy = cy - fromY;
+    const baseLen = Math.hypot(dx, dy) || 1;
+    const dirX = dx / baseLen, dirY = dy / baseLen;
+    // Perpendicular offset (left or right of trajectory)
+    const sign = Math.random() < 0.5 ? 1 : -1;
+    const offset = (rect.width * 0.7 + 25) * sign;
+    const px = -dirY, py = dirX;
+    const overshoot = baseLen + 60 + Math.random() * 60;
+    toX = fromX + dirX * overshoot + px * offset;
+    toY = fromY + dirY * overshoot + py * offset;
+  }
+  drawLaser(fromX, fromY, toX, toY, color);
+  if (isMiss) {
+    SFX.tick();
+    showBlastFeedback(cx, cy - 30, 'miss', null);
+    return { hit: false };
+  }
+  return { hit: true };
+}
+
+/* Bonus points to opposite faction when a ship is destroyed */
+function awardBlastPoints(ship) {
+  const enemyFaction = SHIP_FACTION[ship._type];
+  if (!enemyFaction) return;
+  const winningSide = enemyFaction === 'dark' ? 'light' : 'dark';
+  const pts = SHIP_POINTS[ship._type] || 1;
+  const bonus = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
+  bonus[winningSide] = (bonus[winningSide] || 0) + pts;
+  localStorage.setItem('sw_easter_bonus', JSON.stringify(bonus));
+  const r = ship.getBoundingClientRect();
+  showBlastFeedback(r.left + r.width / 2, r.top + r.height / 2, 'hit', { side: winningSide, pts });
+}
+function showBlastFeedback(x, y, kind, data) {
+  const fb = document.createElement('div');
+  fb.className = 'blast-pts' + (kind === 'miss' ? ' miss' : '');
+  fb.style.left = x + 'px'; fb.style.top = y + 'px';
+  if (kind === 'miss') {
+    fb.textContent = 'MISS';
+  } else {
+    fb.textContent = `+${data.pts} ${data.side === 'light' ? 'LIGHT' : 'DARK'}`;
+    fb.style.color = data.side === 'light' ? 'var(--sw-blue)' : 'var(--sw-red)';
+  }
+  document.body.appendChild(fb);
+  setTimeout(() => fb.remove(), 1500);
+}
 
 function spawnShip() {
   if (document.body.classList.contains('quiz-mode')) return;
   if (document.hidden) return;
 
   let cfg = pickShipType();
-  // Limit to one Death Star at a time
-  if (cfg.type === 'deathstar' && _deathStarOnScreen) cfg = SHIP_TYPES[0];
-  if (cfg.type === 'deathstar') _deathStarOnScreen = true;
+  // Limit to one capital ship (destroyer / deathstar / alduron) on screen at a time
+  if (CAPITAL.has(cfg.type) && _capitalOnScreen) cfg = SHIP_TYPES[0];
+  if (CAPITAL.has(cfg.type)) _capitalOnScreen = true;
 
   // Random edge entry; exit through a different edge
   const W = innerWidth, H = innerHeight, pad = cfg.size + 40;
@@ -1624,6 +1733,8 @@ function spawnShip() {
 
   ship.addEventListener('click', (e) => {
     e.stopPropagation();
+    const result = shoot(e, ship);  // fires laser, may miss
+    if (!result.hit) return;        // miss: no damage
     ship._hp--;
     if (ship._hpEl) ship._hpEl.textContent = '●'.repeat(Math.max(0, ship._hp)) + '○'.repeat(ship._maxHp - Math.max(0, ship._hp));
     if (ship._hp <= 0) {
@@ -1637,7 +1748,7 @@ function spawnShip() {
 
   ship.addEventListener('animationend', (e) => {
     if (e.animationName === 'fly') {
-      if (ship._type === 'deathstar') _deathStarOnScreen = false;
+      if (CAPITAL.has(ship._type)) _capitalOnScreen = false;
       ship.remove();
     }
   });
@@ -1646,9 +1757,10 @@ function spawnShip() {
 }
 
 function explodeShip(ship) {
-  const big = ship._type === 'deathstar' || ship._type === 'destroyer';
+  const big = CAPITAL.has(ship._type);
   if (big) SFX.boom(); else SFX.wrong();
-  if (ship._type === 'deathstar') _deathStarOnScreen = false;
+  if (CAPITAL.has(ship._type)) _capitalOnScreen = false;
+  awardBlastPoints(ship);
 
   const rect = ship.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
