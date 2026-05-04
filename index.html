@@ -1491,15 +1491,21 @@ const Storage = {
   scores: [], blasts: { light: 0, dark: 0 },
   listeners: [], ready: false, _pushTimer: null,
   init() {
-    this.scores = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
-    this.blasts = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
-    this.notify();
     if (JSONBIN_KEY && JSONBIN_ID) {
-      this.setStatus('online', 'Connected to shared leaderboard (JSONBin)');
-      this.pull();
-      setInterval(() => this.pull(), 7000);  // poll for other devices every 7s
+      // Central scoring is authoritative — wipe any stale per-device cache
+      // (entries that were saved before this device was wired to JSONBin).
+      localStorage.removeItem('sw_leaderboard');
+      localStorage.removeItem('sw_easter_bonus');
+      this.scores = []; this.blasts = { light: 0, dark: 0 };
+      this.notify();
+      this.setStatus('online', 'Connecting to shared leaderboard…');
+      this.pull();                                 // load from JSONBin
+      setInterval(() => this.pull(), 7000);        // refresh every 7s
     } else {
+      this.scores = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
+      this.blasts = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
       this.setStatus('offline', 'Local storage only — paste JSONBin keys in code for shared scoring');
+      this.notify();
     }
   },
   setStatus(cls, title) {
@@ -1637,17 +1643,20 @@ function tickCountdown() {
 tickCountdown();
 setInterval(tickCountdown, 1000);
 
-/* Auto-refresh leaderboard every 15 seconds when it's visible
-   (covers cases where Firebase isn't connected or another tab updated localStorage) */
+/* Auto-refresh leaderboard every 15 seconds when it's visible.
+   With JSONBin configured, the 7s pull already covers updates;
+   this is a safety re-render for the local-only case. */
 setInterval(() => {
   if (document.getElementById('screen-leader').classList.contains('active')) {
-    // Re-load from localStorage in case another tab wrote
-    const stored = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
-    const blasts = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
-    if (JSON.stringify(stored) !== JSON.stringify(Storage.scores) ||
-        JSON.stringify(blasts) !== JSON.stringify(Storage.blasts)) {
-      Storage.scores = stored; Storage.blasts = blasts;
-      Storage.notify();
+    if (!(JSONBIN_KEY && JSONBIN_ID)) {
+      // Local-only: re-read from localStorage in case another tab wrote
+      const stored = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
+      const blasts = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
+      if (JSON.stringify(stored) !== JSON.stringify(Storage.scores) ||
+          JSON.stringify(blasts) !== JSON.stringify(Storage.blasts)) {
+        Storage.scores = stored; Storage.blasts = blasts;
+        Storage.notify();
+      }
     }
     renderLeaderboard();
   }
