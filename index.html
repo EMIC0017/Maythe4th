@@ -792,11 +792,28 @@
    ============================================================= */
 function startMusic() {
   const a = document.getElementById('music-audio');
+  if (!a) { console.warn('No music element'); return; }
+  // Force-set src + reload to ensure browsers like Safari pick it up
+  if (!a.src || !a.src.endsWith('main-title.mp3')) a.src = 'main-title.mp3';
   a.volume = 0.6;
+  a.muted = false;
+  try { a.load(); } catch (_) {}
+  const btn = document.getElementById('music-toggle');
+  btn.classList.add('show');
   const p = a.play();
-  if (p && p.catch) p.catch(e => console.warn('Music autoplay blocked:', e));
-  document.getElementById('music-toggle').classList.add('show');
-  document.getElementById('music-toggle').textContent = '♫';
+  if (p && typeof p.then === 'function') {
+    p.then(() => { btn.textContent = '♫'; console.log('Music playing'); })
+     .catch(e => {
+       console.warn('Music autoplay blocked:', e);
+       btn.textContent = '▶ MUSIC';
+       btn.style.width = 'auto';
+       btn.style.padding = '0 12px';
+       btn.style.borderRadius = '4px';
+       btn.title = 'Click to play music';
+     });
+  } else {
+    btn.textContent = '♫';
+  }
 }
 function toggleMusic() {
   const a = document.getElementById('music-audio');
