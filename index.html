@@ -484,6 +484,24 @@
     font-size: 18px; letter-spacing: .15em; text-transform: uppercase;
     background: rgba(20,20,20,.8); border: 1px solid var(--sw-yellow);
   }
+  #contest-countdown {
+    text-align: center; margin: 14px 0 18px; font-family: 'Orbitron', sans-serif;
+    letter-spacing: .15em;
+  }
+  #contest-countdown .cd-label {
+    color: #888; font-size: 11px; text-transform: uppercase; margin-right: 12px;
+  }
+  #contest-countdown .cd-time {
+    color: var(--sw-yellow); font-size: 26px; font-weight: 900;
+    text-shadow: 0 0 14px rgba(255,232,31,.55); font-variant-numeric: tabular-nums;
+  }
+  #contest-countdown .cd-tz {
+    color: #888; font-size: 11px; margin-left: 8px; text-transform: uppercase;
+  }
+  #contest-countdown.warn .cd-time { color: #ffaa00; text-shadow: 0 0 14px rgba(255,170,0,.6); }
+  #contest-countdown.danger .cd-time { color: var(--sw-red); text-shadow: 0 0 14px rgba(255,61,0,.6); animation: pulseTime 1s infinite; }
+  #contest-countdown.ended .cd-time { color: var(--sw-red); font-size: 20px; }
+  @keyframes pulseTime { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
   .center { text-align: center; margin-top: 22px; }
   .small { font-size: 12px; color: #777; }
 </style>
@@ -733,6 +751,12 @@
 
     <div class="winner-banner" id="winner-banner">— No challengers yet —</div>
 
+    <div id="contest-countdown">
+      <span class="cd-label">Contest ends in</span>
+      <span class="cd-time" id="cd-time">--:--:--</span>
+      <span class="cd-tz">PT</span>
+    </div>
+
     <div class="leader-grid">
       <div class="panel">
         <h3 style="color:var(--sw-blue);margin-top:0">All Jedi <span class="small" id="count-light-h" style="color:#666"></span></h3>
@@ -757,7 +781,7 @@
     <div class="center">
       <button class="saber-btn" id="btn-replay">Play Again</button>
     </div>
-    <p class="pun">Scores stored locally on this device. See README to enable shared, real-time scoring.</p>
+    <p class="pun">Game scores are stored until the contest ends at 4:00 PM PT today.</p>
   </section>
 
 </div>
@@ -1557,6 +1581,36 @@ function maybeJumpToLeaderboard() {
 }
 maybeJumpToLeaderboard();
 window.addEventListener('hashchange', maybeJumpToLeaderboard);
+
+/* Contest countdown to 4:00 PM PT today */
+function tickCountdown() {
+  const el = document.getElementById('cd-time');
+  const wrap = document.getElementById('contest-countdown');
+  if (!el || !wrap) return;
+  const now = new Date();
+  // Today's date in Pacific Time (handles late-night user opens correctly)
+  const ptDate = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Los_Angeles',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(now);
+  // 4 PM Pacific — May = PDT = -07:00
+  const target = new Date(`${ptDate}T16:00:00-07:00`);
+  const ms = target.getTime() - now.getTime();
+  wrap.classList.remove('warn', 'danger', 'ended');
+  if (ms <= 0) {
+    el.textContent = 'CONTEST ENDED';
+    wrap.classList.add('ended');
+    return;
+  }
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (ms < 600000) wrap.classList.add('danger');         // < 10 min
+  else if (ms < 3600000) wrap.classList.add('warn');     // < 1 hour
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
 
 /* Auto-refresh leaderboard every 15 seconds when it's visible
    (covers cases where Firebase isn't connected or another tab updated localStorage) */
