@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>May the 4th — Instacart Fan Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pathway+Gothic+One&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     STAR WARS THEME
+     ========================================================= */
+  :root {
+    --sw-yellow: #FFE81F;
+    --sw-blue:   #4FC3F7;
+    --sw-red:    #FF3D00;
+    --sw-purple: #B388FF;
+    --sw-green:  #76FF03;
+    --bg:        #000;
+    --panel:     rgba(10,10,15,0.88);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100vh; background: var(--bg);
+    color: #eee; font-family: 'Orbitron', sans-serif; overflow-x: hidden;
+  }
+  /* Animated starfield */
+  body::before, body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+  body::before {
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, #fff, transparent),
+      radial-gradient(1px 1px at 60% 70%, #fff, transparent),
+      radial-gradient(2px 2px at 80% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 40% 80%, #ccc, transparent),
+      radial-gradient(1.5px 1.5px at 90% 50%, #fff, transparent),
+      radial-gradient(1px 1px at 10% 60%, #ddd, transparent),
+      radial-gradient(1px 1px at 75% 90%, #fff, transparent),
+      radial-gradient(2px 2px at 30% 15%, #fff, transparent),
+      radial-gradient(1px 1px at 50% 50%, #aaa, transparent),
+      radial-gradient(1.5px 1.5px at 5% 95%, #fff, transparent);
+    background-size: 100% 100%;
+    animation: twinkle 4s infinite alternate;
+  }
+  body::after {
+    background-image:
+      radial-gradient(1px 1px at 15% 25%, #fff, transparent),
+      radial-gradient(1px 1px at 85% 75%, #fff, transparent),
+      radial-gradient(2px 2px at 35% 65%, #fff, transparent),
+      radial-gradient(1px 1px at 65% 35%, #fff, transparent),
+      radial-gradient(1px 1px at 25% 85%, #aaa, transparent);
+    background-size: 200% 200%; opacity: .55;
+    animation: twinkle 6s infinite alternate-reverse;
+  }
+  @keyframes twinkle { from { opacity: .4 } to { opacity: 1 } }
+
+  .stage {
+    position: relative; z-index: 1; max-width: 900px; margin: 0 auto;
+    padding: 28px 20px; min-height: 100vh;
+  }
+  .screen { display: none; animation: fadeIn .6s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1 } }
+
+  h1, h2, h3 { color: var(--sw-yellow); letter-spacing: .08em; text-transform: uppercase; }
+  h1 { font-size: clamp(28px, 6vw, 56px); text-align: center; margin: .2em 0; text-shadow: 0 0 16px rgba(255,232,31,.55); }
+  h2 { font-size: clamp(20px, 3.5vw, 32px); }
+  .tagline { text-align: center; color: #bbb; letter-spacing: .25em; font-size: 14px; margin-bottom: 32px; }
+  .pun { font-style: italic; color: #888; text-align: center; margin: 14px 0; font-size: 13px; letter-spacing: .12em; }
+
+  .panel {
+    background: var(--panel); border: 1px solid #222; border-radius: 8px;
+    padding: 22px; box-shadow: 0 0 32px rgba(255,232,31,.06);
+  }
+
+  /* Lightsaber buttons */
+  .saber-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px 28px; font-family: 'Orbitron', sans-serif; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; font-size: 15px;
+    background: linear-gradient(180deg, #1a1a1a, #0a0a0a);
+    color: var(--sw-yellow); border: 1px solid var(--sw-yellow);
+    border-radius: 4px; cursor: pointer; transition: all .2s;
+    box-shadow: 0 0 12px rgba(255,232,31,.3), inset 0 0 8px rgba(255,232,31,.15);
+  }
+  .saber-btn:hover { box-shadow: 0 0 24px rgba(255,232,31,.7), inset 0 0 12px rgba(255,232,31,.3); transform: translateY(-1px); }
+  .saber-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .saber-btn.blue { color: var(--sw-blue); border-color: var(--sw-blue); box-shadow: 0 0 12px rgba(79,195,247,.4); }
+  .saber-btn.blue:hover { box-shadow: 0 0 28px rgba(79,195,247,.8); }
+  .saber-btn.red { color: var(--sw-red); border-color: var(--sw-red); box-shadow: 0 0 12px rgba(255,61,0,.4); }
+  .saber-btn.red:hover { box-shadow: 0 0 28px rgba(255,61,0,.8); }
+
+  input.sw-input {
+    width: 100%; padding: 14px 16px; font-family: 'Orbitron', sans-serif;
+    font-size: 16px; background: #050505; color: var(--sw-yellow);
+    border: 1px solid #333; border-radius: 4px; letter-spacing: .1em; text-align: center;
+  }
+  input.sw-input:focus { outline: none; border-color: var(--sw-yellow); box-shadow: 0 0 12px rgba(255,232,31,.4); }
+  label.sw-label { display: block; color: #aaa; font-size: 12px; letter-spacing: .25em;
+    text-transform: uppercase; margin-bottom: 8px; text-align: center; }
+
+  /* =========================================================
+     SPLASH (click to begin)
+     ========================================================= */
+  #screen-splash { text-align: center; padding-top: 12vh; }
+  #screen-splash .big-logo {
+    font-family: 'Orbitron', sans-serif; font-weight: 900;
+    font-size: clamp(40px, 9vw, 96px); color: var(--sw-yellow);
+    letter-spacing: .12em; text-shadow: 0 0 24px rgba(255,232,31,.6);
+    margin-bottom: 12px;
+  }
+  #screen-splash .sub {
+    color: #ccc; letter-spacing: .3em; margin-bottom: 36px; font-size: 14px;
+  }
+  .hero-art { text-align: center; margin: 18px auto;
+    display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .hero-art svg { filter: drop-shadow(0 0 12px rgba(255,232,31,.3)); }
+
+  /* =========================================================
+     INTRO CRAWL  (full-screen Star Wars opener)
+     Inspired by Sitepoint's CSS3 implementation
+     ========================================================= */
+  #screen-intro {
+    position: fixed; inset: 0; background: #000; z-index: 50;
+    overflow: hidden;
+  }
+  #screen-intro.active { display: block !important; }
+  #screen-intro:not(.active) { display: none !important; }
+  .intro-skip {
+    position: absolute; top: 20px; right: 20px; z-index: 60;
+    font-size: 11px; color: #666; background: transparent; border: 1px solid #333;
+    padding: 6px 12px; border-radius: 3px; cursor: pointer; letter-spacing: .15em;
+    font-family: 'Orbitron', sans-serif; text-transform: uppercase;
+  }
+  .intro-skip:hover { color: var(--sw-yellow); border-color: var(--sw-yellow); }
+
+  /* Stage 1: blue "A long time ago" */
+  .intro-prelude {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: #4FC3F7; font-family: 'Pathway Gothic One', sans-serif;
+    font-size: clamp(22px, 4vw, 36px); letter-spacing: .04em; text-align: center;
+    padding: 0 24px;
+    opacity: 0; animation: prelude 6s ease forwards;
+  }
+  @keyframes prelude {
+    0%   { opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Stage 2: huge STAR WARS logo zooming away */
+  .intro-logo {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .intro-logo .logo-text {
+    color: var(--sw-yellow); font-family: 'Orbitron', sans-serif; font-weight: 900;
+    font-size: 28vw; letter-spacing: -0.04em; line-height: .9; text-align: center;
+    text-shadow: 0 0 24px rgba(255,232,31,.6);
+    transform: scale(2.2); opacity: 0;
+    animation: logoZoom 8s ease-in forwards;
+    animation-delay: 6s;
+  }
+  @keyframes logoZoom {
+    0%   { transform: scale(2.2); opacity: 0; }
+    10%  { opacity: 1; }
+    100% { transform: scale(0.05); opacity: 0; }
+  }
+
+  /* Stage 3: the crawl */
+  .intro-crawl-stage {
+    position: absolute; inset: 0; perspective: 400px; overflow: hidden;
+    opacity: 0; animation: stageIn 1s ease 14s forwards;
+  }
+  @keyframes stageIn { to { opacity: 1; } }
+  .intro-crawl {
+    position: absolute; left: 0; right: 0; top: 100%;
+    color: var(--sw-yellow); font-family: 'Pathway Gothic One', sans-serif;
+    text-align: justify; font-size: clamp(20px, 3.6vw, 32px); line-height: 1.5;
+    letter-spacing: .04em;
+    transform-origin: 50% 100%;
+    transform: rotateX(25deg);
+    width: min(80%, 720px); margin: 0 auto;
+    animation: introScroll 60s linear 14s forwards;
+  }
+  @keyframes introScroll {
+    0%   { top: 100%; }
+    100% { top: -240%; }
+  }
+  .intro-crawl h2.episode {
+    text-align: center; font-family: 'Pathway Gothic One', sans-serif;
+    font-size: 1.2em; color: var(--sw-yellow); letter-spacing: .15em;
+    text-transform: none; margin-bottom: .2em;
+  }
+  .intro-crawl h1.title {
+    text-align: center; font-family: 'Pathway Gothic One', sans-serif;
+    font-size: 2em; color: var(--sw-yellow); letter-spacing: .08em;
+    margin: 0 0 1.2em; text-shadow: none;
+  }
+  .intro-crawl p { margin: 0 0 1.4em; }
+
+  /* =========================================================
+     SIDE SELECTION
+     ========================================================= */
+  .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 24px; }
+  .side-card {
+    border: 1px solid #333; border-radius: 8px; padding: 28px 18px;
+    text-align: center; cursor: pointer; transition: all .25s;
+    background: linear-gradient(180deg, rgba(20,20,30,.6), rgba(0,0,0,.9));
+    position: relative; overflow: hidden;
+  }
+  .side-card .saber-icon {
+    width: 8px; height: 180px; margin: 16px auto; border-radius: 4px;
+    box-shadow: 0 0 24px currentColor, inset 0 0 8px #fff;
+  }
+  .side-card.light { color: var(--sw-blue); }
+  .side-card.light .saber-icon { background: linear-gradient(to top, #888 0 24px, var(--sw-blue) 24px 100%); }
+  .side-card.dark  { color: var(--sw-red); }
+  .side-card.dark  .saber-icon { background: linear-gradient(to top, #888 0 24px, var(--sw-red) 24px 100%); }
+  .side-card:hover { transform: translateY(-4px) scale(1.02); border-color: currentColor; }
+  .side-card h3 { color: inherit; margin: 0 0 8px; }
+  .side-card p  { color: #bbb; font-size: 13px; min-height: 38px; }
+  .side-card svg { width: 60px; height: 60px; }
+
+  /* =========================================================
+     QUIZ SCREEN
+     ========================================================= */
+  .quiz-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; border-bottom: 1px solid #222; margin-bottom: 18px;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .quiz-meta { font-size: 12px; letter-spacing: .2em; color: #888; }
+  .quiz-meta b { color: var(--sw-yellow); }
+  .quiz-meta .side-light { color: var(--sw-blue); }
+  .quiz-meta .side-dark  { color: var(--sw-red);  }
+
+  /* Timer ring */
+  .timer-ring { position: relative; width: 56px; height: 56px; }
+  .timer-ring svg.t-svg { transform: rotate(-90deg); }
+  .timer-ring .ring-bg, .timer-ring .ring-fg { fill: none; stroke-width: 5; }
+  .timer-ring .ring-bg { stroke: #222; }
+  .timer-ring .ring-fg {
+    stroke: var(--sw-yellow); stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke .3s;
+  }
+  .timer-ring .ring-fg.warn { stroke: #ffaa00; }
+  .timer-ring .ring-fg.danger { stroke: var(--sw-red); }
+  .timer-ring .num {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: var(--sw-yellow); font-size: 18px;
+  }
+  .timer-ring .num.three { font-size: 14px; }
+
+  /* Per-question art */
+  .q-art {
+    text-align: center; margin: 0 auto 8px; height: 110px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .q-art svg { max-height: 110px; height: 110px; width: auto;
+    filter: drop-shadow(0 0 8px rgba(255,232,31,.25)); }
+
+  /* In-question crawl container */
+  .crawl-stage {
+    height: 180px; perspective: 360px; overflow: hidden; position: relative;
+    margin-bottom: 18px; background: radial-gradient(ellipse at bottom, rgba(255,232,31,.05), transparent 70%);
+    border-radius: 6px;
+  }
+  .crawl {
+    position: absolute; bottom: -50%; left: 0; right: 0;
+    transform-origin: 50% 100%;
+    transform: rotateX(28deg);
+    color: var(--sw-yellow); font-family: 'Pathway Gothic One', sans-serif;
+    text-align: center; font-size: clamp(18px, 3vw, 26px); line-height: 1.4;
+    padding: 0 20px; letter-spacing: .04em;
+    animation: crawl 5s linear forwards;
+  }
+  @keyframes crawl {
+    0%   { transform: rotateX(28deg) translateY(0); opacity: 0; }
+    10%  { opacity: 1; }
+    100% { transform: rotateX(28deg) translateY(-220px); opacity: .9; }
+  }
+
+  .answers { display: grid; gap: 10px; }
+  .answer-btn {
+    text-align: left; padding: 14px 18px; font-family: 'Orbitron', sans-serif;
+    font-size: 15px; background: rgba(15,15,20,.85); color: #eee;
+    border: 1px solid #333; border-radius: 4px; cursor: pointer; transition: all .15s;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .answer-btn:hover { border-color: var(--sw-yellow); background: rgba(40,40,20,.6); }
+  .answer-btn .key {
+    display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center;
+    border: 1px solid var(--sw-yellow); color: var(--sw-yellow); border-radius: 50%;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .answer-btn.correct { border-color: var(--sw-green); background: rgba(118,255,3,.12); color: var(--sw-green); }
+  .answer-btn.correct .key { border-color: var(--sw-green); color: var(--sw-green); }
+  .answer-btn.wrong   { border-color: var(--sw-red); background: rgba(255,61,0,.12); color: var(--sw-red); }
+  .answer-btn.wrong .key { border-color: var(--sw-red); color: var(--sw-red); }
+  .answer-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 14px; padding: 12px 16px; border-radius: 4px; font-size: 14px;
+    background: rgba(20,20,20,.7); border-left: 3px solid var(--sw-yellow); display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.good { border-left-color: var(--sw-green); color: var(--sw-green); }
+  .feedback.bad  { border-left-color: var(--sw-red);   color: var(--sw-red);   }
+
+  /* Music control */
+  #music-toggle {
+    position: fixed; bottom: 14px; right: 14px; z-index: 100;
+    background: rgba(0,0,0,.7); border: 1px solid #444; border-radius: 50%;
+    width: 40px; height: 40px; cursor: pointer; color: var(--sw-yellow);
+    font-size: 18px; display: none; align-items: center; justify-content: center;
+  }
+  #music-toggle.show { display: flex; }
+  #music-toggle:hover { border-color: var(--sw-yellow); box-shadow: 0 0 12px rgba(255,232,31,.4); }
+  #music-audio { display: none; }
+
+  /* =========================================================
+     EASTER EGG — flying ships in the background
+     ========================================================= */
+  #ships {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .ship {
+    position: absolute; pointer-events: auto; cursor: crosshair;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,.25));
+    transition: filter .15s;
+    transform: translate(0,0) rotate(var(--rot, 0deg));
+    animation: fly var(--dur, 14s) linear forwards;
+  }
+  .ship:hover { filter: drop-shadow(0 0 14px var(--sw-yellow)); }
+  .ship.hit   { filter: brightness(2.5) drop-shadow(0 0 18px var(--sw-yellow)); }
+  .ship.dying { animation: shipBoom .8s forwards; pointer-events: none; }
+  @keyframes fly {
+    to { transform: translate(var(--tx), var(--ty)) rotate(var(--rot, 0deg)); }
+  }
+  @keyframes shipBoom {
+    0%   { filter: brightness(3) drop-shadow(0 0 24px #ff7043); transform: translate(var(--tx),var(--ty)) rotate(var(--rot,0deg)) scale(1); opacity: 1; }
+    40%  { transform: translate(var(--tx),var(--ty)) rotate(var(--rot,0deg)) scale(2); opacity: 1; }
+    100% { transform: translate(var(--tx),var(--ty)) rotate(var(--rot,0deg)) scale(0); opacity: 0; }
+  }
+  .boom-particle {
+    position: absolute; width: 4px; height: 4px; border-radius: 50%;
+    pointer-events: none; animation: particle .9s ease-out forwards;
+  }
+  @keyframes particle {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; }
+  }
+  body.quiz-mode #ships { display: none; }
+  .ship-hp {
+    position: absolute; bottom: -10px; left: 0; right: 0; text-align: center;
+    font-family: 'Orbitron', sans-serif; font-size: 9px; color: var(--sw-green);
+    letter-spacing: .15em; pointer-events: none;
+  }
+
+  /* Star Wars name generator */
+  .namegen {
+    margin-top: 10px; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+    align-items: center;
+  }
+  .namegen .label {
+    color: #888; font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .namegen-btn {
+    padding: 6px 12px; font-family: 'Orbitron', sans-serif; font-size: 10px;
+    letter-spacing: .15em; background: transparent; color: #aaa;
+    border: 1px solid #444; border-radius: 3px; cursor: pointer;
+    transition: all .15s; text-transform: uppercase; font-weight: 700;
+  }
+  .namegen-btn:hover {
+    color: var(--sw-yellow); border-color: var(--sw-yellow);
+    box-shadow: 0 0 10px rgba(255,232,31,.35);
+  }
+  .namegen-btn.jedi:hover  { color: var(--sw-blue);   border-color: var(--sw-blue);   box-shadow: 0 0 10px rgba(79,195,247,.4); }
+  .namegen-btn.sith:hover  { color: var(--sw-red);    border-color: var(--sw-red);    box-shadow: 0 0 10px rgba(255,61,0,.4); }
+  .namegen-btn.bh:hover    { color: var(--sw-green);  border-color: var(--sw-green);  box-shadow: 0 0 10px rgba(118,255,3,.4); }
+  .namegen-btn.droid:hover { color: var(--sw-purple); border-color: var(--sw-purple); box-shadow: 0 0 10px rgba(179,136,255,.4); }
+
+  /* Results / leaderboard */
+  .score-big {
+    font-size: 64px; color: var(--sw-yellow); text-align: center; font-weight: 900;
+    text-shadow: 0 0 24px rgba(255,232,31,.6);
+  }
+  .score-detail { text-align: center; color: #aaa; letter-spacing: .15em; margin-top: 6px; font-size: 13px; }
+
+  table.leader {
+    width: 100%; border-collapse: collapse; margin-top: 12px;
+    font-family: 'Orbitron', sans-serif; font-size: 13px;
+  }
+  table.leader th {
+    color: var(--sw-yellow); text-align: left; padding: 8px 10px;
+    border-bottom: 1px solid #333; letter-spacing: .15em; font-size: 11px; text-transform: uppercase;
+  }
+  table.leader td { padding: 8px 10px; border-bottom: 1px solid #1a1a1a; }
+  table.leader tr.me { background: rgba(255,232,31,.07); }
+  .leader-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .leader-grid { grid-template-columns: 1fr } .sides { grid-template-columns: 1fr } }
+  .side-totals {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; text-align: center;
+  }
+  .total-card { padding: 18px; border-radius: 6px; border: 1px solid #333; }
+  .total-card.light { color: var(--sw-blue); border-color: rgba(79,195,247,.4); }
+  .total-card.dark  { color: var(--sw-red);  border-color: rgba(255,61,0,.4); }
+  .total-card .num { font-size: 36px; font-weight: 900; }
+  .winner-banner {
+    text-align: center; padding: 18px; margin: 18px 0; border-radius: 6px;
+    font-size: 18px; letter-spacing: .15em; text-transform: uppercase;
+    background: rgba(20,20,20,.8); border: 1px solid var(--sw-yellow);
+  }
+  .center { text-align: center; margin-top: 22px; }
+  .small { font-size: 12px; color: #777; }
+</style>
+</head>
+<body>
+
+<!-- Background music: local mp3 file -->
+<audio id="music-audio" src="main-title.mp3" loop preload="auto"></audio>
+<button id="music-toggle" title="Toggle music">♪</button>
+
+<!-- Easter egg: clickable flying ships -->
+<div id="ships"></div>
+
+<div class="stage">
+
+  <!-- =========================================================
+       SCREEN 0 : SPLASH (click to begin = unlocks audio autoplay)
+       ========================================================= -->
+  <section id="screen-splash" class="screen active">
+    <div class="big-logo">STAR WARS</div>
+    <div class="sub">★ MAY THE 4TH ★ INSTACART FAN QUIZ ★</div>
+    <div class="hero-art">
+      <!-- Crossed lightsabers SVG -->
+      <svg viewBox="0 0 200 200" width="160" height="160">
+        <defs>
+          <linearGradient id="bladeBlue" x1="0" x2="1">
+            <stop offset="0" stop-color="#fff"/><stop offset=".15" stop-color="#fff"/>
+            <stop offset="1" stop-color="#4FC3F7"/>
+          </linearGradient>
+          <linearGradient id="bladeRed" x1="0" x2="1">
+            <stop offset="0" stop-color="#fff"/><stop offset=".15" stop-color="#fff"/>
+            <stop offset="1" stop-color="#FF3D00"/>
+          </linearGradient>
+        </defs>
+        <g transform="translate(100 100) rotate(-45)">
+          <rect x="-90" y="-6" width="120" height="12" rx="3" fill="url(#bladeBlue)" filter="drop-shadow(0 0 6px #4FC3F7)"/>
+          <rect x="30" y="-7" width="22" height="14" fill="#666"/>
+          <rect x="50" y="-9" width="6" height="18" fill="#222"/>
+        </g>
+        <g transform="translate(100 100) rotate(45)">
+          <rect x="-90" y="-6" width="120" height="12" rx="3" fill="url(#bladeRed)" filter="drop-shadow(0 0 6px #FF3D00)"/>
+          <rect x="30" y="-7" width="22" height="14" fill="#666"/>
+          <rect x="50" y="-9" width="6" height="18" fill="#222"/>
+        </g>
+      </svg>
+    </div>
+    <div class="center">
+      <button class="saber-btn" id="btn-begin">► Begin (with sound)</button>
+      <div style="margin-top:10px"><button class="saber-btn" id="btn-begin-mute" style="font-size:11px;padding:8px 14px">Skip music</button></div>
+    </div>
+    <p class="pun">"In space, no one can hear you guess."</p>
+  </section>
+
+  <!-- =========================================================
+       SCREEN 0.5 : FULL-SCREEN INTRO CRAWL
+       ========================================================= -->
+  <section id="screen-intro" class="screen">
+    <button class="intro-skip" id="btn-skip-intro">Skip ▶</button>
+    <div class="intro-prelude">A long time ago<br>in a galaxy far, far away....</div>
+    <div class="intro-logo"><div class="logo-text">STAR<br>WARS</div></div>
+    <div class="intro-crawl-stage">
+      <div class="intro-crawl">
+        <h2 class="episode">Episode MMXXVI</h2>
+        <h1 class="title">THE MAY 4TH RECKONING</h1>
+        <p>It is a period of intergalactic <b>TEAM BUILDING</b>. The brave shoppers, engineers, and quizmasters of <b>INSTACART</b> have gathered from across the network to test their knowledge of Star Wars canon.</p>
+        <p>Pursued by ten devious questions and a relentless ticking clock, each champion must choose a side of the <b>FORCE</b> and battle for honor, glory, and a place atop the <b>GALACTIC LEADERBOARD</b>.</p>
+        <p>Even now, the LIGHT and the DARK gather their numbers. By day's end, only one side shall claim victory....</p>
+        <p style="text-align:center;margin-top:2em">May the 4th be with you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCREEN 1 : LOGIN
+       ========================================================= -->
+  <section id="screen-login" class="screen">
+    <h1>Star Wars Trivia</h1>
+    <div class="tagline">★ Identify yourself, rebel ★</div>
+    <div class="hero-art">
+      <!-- Death Star SVG -->
+      <svg viewBox="0 0 140 140" width="120" height="120">
+        <defs>
+          <radialGradient id="dsGrad" cx="40%" cy="35%">
+            <stop offset="0" stop-color="#bbb"/><stop offset="1" stop-color="#3a3a3a"/>
+          </radialGradient>
+        </defs>
+        <circle cx="70" cy="70" r="60" fill="url(#dsGrad)" stroke="#222" stroke-width="1.5"/>
+        <circle cx="48" cy="48" r="14" fill="#2a2a2a"/>
+        <circle cx="48" cy="48" r="6" fill="#0a0a0a"/>
+        <line x1="10" y1="70" x2="130" y2="70" stroke="#1a1a1a" stroke-width="1"/>
+        <line x1="14" y1="50" x2="126" y2="50" stroke="#2a2a2a" stroke-width=".7"/>
+        <line x1="14" y1="90" x2="126" y2="90" stroke="#2a2a2a" stroke-width=".7"/>
+        <line x1="70" y1="14" x2="70" y2="126" stroke="#2a2a2a" stroke-width=".7"/>
+      </svg>
+    </div>
+    <div class="panel" style="max-width: 480px; margin: 0 auto;">
+      <label class="sw-label" for="username">Your name, padawan</label>
+      <input id="username" class="sw-input" placeholder="YOUR NAME" maxlength="30" autocomplete="off"/>
+      <div class="namegen">
+        <span class="label">No name? Roll one:</span>
+        <button class="namegen-btn jedi"  data-gen="jedi">Jedi</button>
+        <button class="namegen-btn sith"  data-gen="sith">Sith</button>
+        <button class="namegen-btn bh"    data-gen="bh">Bounty Hunter</button>
+        <button class="namegen-btn droid" data-gen="droid">Droid</button>
+      </div>
+      <p class="pun">"Help me, Obi-Wan. You're our only hope... at the leaderboard."</p>
+      <div class="center">
+        <button class="saber-btn" id="btn-to-side">Continue →</button>
+      </div>
+      <div class="center" style="margin-top:12px">
+        <a href="#" id="link-replay-intro" style="color:#888;font-size:11px;letter-spacing:.2em;text-decoration:none;text-transform:uppercase;">↻ Replay intro crawl</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCREEN 2 : CHOOSE SIDE
+       ========================================================= -->
+  <section id="screen-side" class="screen">
+    <h2 style="text-align:center">Choose your side</h2>
+    <div class="tagline">Your destiny awaits</div>
+    <div class="sides">
+      <div class="side-card light" data-side="light">
+        <!-- Jedi Order symbol -->
+        <svg viewBox="0 0 64 64" width="56" height="56">
+          <circle cx="32" cy="32" r="28" fill="none" stroke="#4FC3F7" stroke-width="2"/>
+          <path d="M32 8 L32 56 M16 22 Q32 44 48 22" stroke="#4FC3F7" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M14 16 L14 28 M50 16 L50 28" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <h3>Light Side</h3>
+        <p>"Your focus determines your reality."</p>
+        <div class="saber-icon"></div>
+        <button class="saber-btn blue">Join the Jedi</button>
+      </div>
+      <div class="side-card dark" data-side="dark">
+        <!-- Sith / Empire symbol -->
+        <svg viewBox="0 0 64 64" width="56" height="56">
+          <circle cx="32" cy="32" r="28" fill="none" stroke="#FF3D00" stroke-width="2"/>
+          <g stroke="#FF3D00" stroke-width="2.5" stroke-linecap="round">
+            <path d="M32 10 L32 22 M32 42 L32 54 M10 32 L22 32 M42 32 L54 32"/>
+            <path d="M18 18 L26 26 M38 38 L46 46 M46 18 L38 26 M26 38 L18 46"/>
+          </g>
+          <circle cx="32" cy="32" r="5" fill="#FF3D00"/>
+        </svg>
+        <h3>Dark Side</h3>
+        <p>"Together we shall rule the leaderboard."</p>
+        <div class="saber-icon"></div>
+        <button class="saber-btn red">Embrace the Sith</button>
+      </div>
+    </div>
+    <p class="pun" style="margin-top:24px">Choose wisely. Or don't. The Force is forgiving.</p>
+  </section>
+
+  <!-- =========================================================
+       SCREEN 3 : QUIZ
+       ========================================================= -->
+  <section id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <div class="quiz-meta"><span id="qm-name">—</span> · <span id="qm-side">—</span></div>
+      <div class="quiz-meta">Question <b id="qm-num">1</b> / <b id="qm-total">10</b> · Score <b id="qm-score">0</b></div>
+      <div class="timer-ring">
+        <svg width="56" height="56" class="t-svg">
+          <circle class="ring-bg" cx="28" cy="28" r="24"/>
+          <circle class="ring-fg" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="0"/>
+        </svg>
+        <div class="num" id="timer-num">30</div>
+      </div>
+    </div>
+
+    <div class="q-art" id="q-art"></div>
+    <div class="crawl-stage"><div class="crawl" id="crawl">…</div></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+  <!-- =========================================================
+       SCREEN 4 : RESULTS
+       ========================================================= -->
+  <section id="screen-results" class="screen">
+    <h2 style="text-align:center">Quiz Complete</h2>
+    <div class="hero-art">
+      <!-- Trophy SVG -->
+      <svg viewBox="0 0 100 120" width="100" height="120">
+        <path d="M30 20 L70 20 L68 60 Q68 78 50 80 Q32 78 32 60 Z" fill="#FFE81F" stroke="#b89c00" stroke-width="2"/>
+        <path d="M30 30 Q15 30 15 45 Q15 58 30 60" fill="none" stroke="#FFE81F" stroke-width="3"/>
+        <path d="M70 30 Q85 30 85 45 Q85 58 70 60" fill="none" stroke="#FFE81F" stroke-width="3"/>
+        <rect x="42" y="80" width="16" height="14" fill="#b89c00"/>
+        <rect x="32" y="94" width="36" height="6" fill="#FFE81F"/>
+        <rect x="28" y="100" width="44" height="8" fill="#b89c00"/>
+        <text x="50" y="55" text-anchor="middle" fill="#000" font-size="20" font-weight="900" font-family="Orbitron">★</text>
+      </svg>
+    </div>
+    <div class="panel" style="max-width: 520px; margin: 0 auto;">
+      <div class="score-big" id="final-score">0</div>
+      <div class="score-detail">
+        <span id="final-correct">0</span> correct · <span id="final-time">0</span>s total
+      </div>
+      <p class="pun" id="final-pun">"You've taken your first step into a larger world."</p>
+      <div class="center">
+        <button class="saber-btn" id="btn-to-leader">View Leaderboard →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCREEN 5 : LEADERBOARD
+       ========================================================= -->
+  <section id="screen-leader" class="screen">
+    <h2 style="text-align:center">The Galactic Leaderboard</h2>
+    <div class="hero-art">
+      <!-- Millennium Falcon (top-down silhouette) -->
+      <svg viewBox="0 0 200 80" width="200" height="80">
+        <ellipse cx="100" cy="40" rx="70" ry="28" fill="#bbb" stroke="#444" stroke-width="2"/>
+        <circle cx="100" cy="40" r="18" fill="#888" stroke="#333" stroke-width="1"/>
+        <rect x="155" y="34" width="22" height="12" fill="#666"/>
+        <path d="M30 28 L8 20 L8 28 Z M30 52 L8 60 L8 52 Z" fill="#888"/>
+        <circle cx="100" cy="40" r="5" fill="#4FC3F7"/>
+        <line x1="100" y1="22" x2="100" y2="58" stroke="#444" stroke-width=".5"/>
+      </svg>
+    </div>
+
+    <div class="side-totals">
+      <div class="total-card light">
+        <div style="font-size:12px;letter-spacing:.2em">LIGHT SIDE</div>
+        <div class="num" id="total-light">0</div>
+        <div class="small"><span id="count-light">0</span> jedi</div>
+      </div>
+      <div class="total-card dark">
+        <div style="font-size:12px;letter-spacing:.2em">DARK SIDE</div>
+        <div class="num" id="total-dark">0</div>
+        <div class="small"><span id="count-dark">0</span> sith</div>
+      </div>
+    </div>
+
+    <div class="winner-banner" id="winner-banner">— No challengers yet —</div>
+
+    <div class="leader-grid">
+      <div class="panel">
+        <h3 style="color:var(--sw-blue);margin-top:0">Top Jedi</h3>
+        <table class="leader" id="table-light">
+          <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Time</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h3 style="color:var(--sw-red);margin-top:0">Top Sith</h3>
+        <table class="leader" id="table-dark">
+          <thead><tr><th>#</th><th>Name</th><th>Score</th><th>Time</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="center">
+      <button class="saber-btn" id="btn-replay">Play Again</button>
+    </div>
+    <p class="pun">Scores stored locally on this device. See README to enable shared, real-time scoring.</p>
+  </section>
+
+</div>
+
+<script>
+/* =============================================================
+   MUSIC — local mp3 (HTML5 audio)
+   ============================================================= */
+function startMusic() {
+  const a = document.getElementById('music-audio');
+  a.volume = 0.6;
+  const p = a.play();
+  if (p && p.catch) p.catch(e => console.warn('Music autoplay blocked:', e));
+  document.getElementById('music-toggle').classList.add('show');
+  document.getElementById('music-toggle').textContent = '♫';
+}
+function toggleMusic() {
+  const a = document.getElementById('music-audio');
+  const btn = document.getElementById('music-toggle');
+  if (a.paused) { a.play(); btn.textContent = '♫'; }
+  else { a.pause(); btn.textContent = '♪'; }
+}
+document.getElementById('music-toggle').addEventListener('click', toggleMusic);
+
+/* =============================================================
+   SOUND EFFECTS — synthesized via Web Audio API
+   (no external files, no copyright concerns)
+   ============================================================= */
+let _audioCtx = null;
+function audio() {
+  try {
+    if (!_audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { console.warn('Web Audio not supported'); return null; }
+      _audioCtx = new AC();
+    }
+    if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  } catch (e) { console.warn('audio init failed', e); return null; }
+  return _audioCtx;
+}
+function tone({freq=440, dur=0.2, type='sine', vol=0.35, attack=0.01, release=0.1, slideTo=null, when=0}) {
+  const ctx = audio(); if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const t0 = ctx.currentTime + when;
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.linearRampToValueAtTime(vol, t0 + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + release);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0); osc.stop(t0 + dur + release + 0.05);
+  } catch (e) { console.warn('tone failed', e); }
+}
+function noise({dur=0.3, vol=0.25, lpf=2000, when=0}) {
+  const ctx = audio(); if (!ctx) return;
+  try {
+    const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1 - i/d.length);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = lpf;
+    const g = ctx.createGain(); g.gain.value = vol;
+    src.connect(filt).connect(g).connect(ctx.destination);
+    src.start(ctx.currentTime + when);
+  } catch (e) { console.warn('noise failed', e); }
+}
+const SFX = {
+  // Lightsaber ignite: rising whoosh + hum
+  saber()    { tone({freq: 80, slideTo: 240, dur: .35, type: 'sawtooth', vol: .35, release: .2});
+               tone({freq: 110, dur: .5, type: 'triangle', vol: .15, release: .3}); },
+  correct()  { tone({freq: 523, dur: .12, type: 'square', vol: .3});
+               tone({freq: 784, dur: .12, type: 'square', vol: .3, when: .12});
+               tone({freq: 1047, dur: .25, type: 'square', vol: .3, when: .24}); },
+  wrong()    { tone({freq: 220, slideTo: 70, dur: .5, type: 'sawtooth', vol: .35, release: .2});
+               noise({dur: .35, vol: .15, lpf: 800}); },
+  tick()     { tone({freq: 1200, dur: .04, type: 'square', vol: .15, release: 0.02}); },
+  boom()     { tone({freq: 90, slideTo: 30, dur: .8, type: 'sawtooth', vol: .4, release: .4});
+               noise({dur: .9, vol: .25, lpf: 400}); },
+  click()    { tone({freq: 600, dur: .04, type: 'square', vol: .15, release: 0.02}); }
+};
+
+/* =============================================================
+   SVG ART LIBRARY — themed per question
+   ============================================================= */
+const ART = {
+  yoda: `<svg viewBox="0 0 100 120">
+    <ellipse cx="50" cy="105" rx="36" ry="12" fill="#4a3826"/>
+    <path d="M22 78 L18 110 L82 110 L78 78 Z" fill="#5d4037"/>
+    <ellipse cx="50" cy="60" rx="24" ry="22" fill="#8bc34a"/>
+    <path d="M28 50 L8 30 L24 60 Z" fill="#8bc34a"/>
+    <path d="M72 50 L92 30 L76 60 Z" fill="#8bc34a"/>
+    <ellipse cx="40" cy="60" rx="3" ry="4" fill="#000"/>
+    <ellipse cx="60" cy="60" rx="3" ry="4" fill="#000"/>
+    <path d="M40 72 Q50 76 60 72" stroke="#000" stroke-width="1.5" fill="none"/>
+    <path d="M30 80 Q35 88 30 95" stroke="#5d4037" stroke-width="3" fill="none"/>
+  </svg>`,
+
+  vader: `<svg viewBox="0 0 100 120">
+    <path d="M50 8 C20 8 12 38 14 70 C16 102 32 115 50 115 C68 115 84 102 86 70 C88 38 80 8 50 8 Z"
+          fill="#0a0a0a" stroke="#222" stroke-width="1"/>
+    <path d="M22 50 L78 50 L74 62 L26 62 Z" fill="#1a1a1a"/>
+    <ellipse cx="34" cy="55" rx="11" ry="6" fill="#1a0000" stroke="#444" stroke-width="1"/>
+    <ellipse cx="66" cy="55" rx="11" ry="6" fill="#1a0000" stroke="#444" stroke-width="1"/>
+    <path d="M50 65 L40 82 L60 82 Z" fill="#000"/>
+    <rect x="40" y="86" width="20" height="3" fill="#333"/>
+    <rect x="42" y="92" width="16" height="2" fill="#333"/>
+    <rect x="44" y="97" width="12" height="2" fill="#333"/>
+  </svg>`,
+
+  cantina: `<svg viewBox="0 0 220 120">
+    <!-- Greedo-ish -->
+    <ellipse cx="35" cy="55" rx="20" ry="22" fill="#7cb342"/>
+    <ellipse cx="28" cy="50" rx="3" ry="5" fill="#000"/>
+    <ellipse cx="42" cy="50" rx="3" ry="5" fill="#000"/>
+    <path d="M30 70 Q35 76 40 70" stroke="#000" fill="none" stroke-width="1.5"/>
+    <rect x="22" y="78" width="26" height="32" fill="#5d4037"/>
+    <!-- Aragorn (the imposter — human silhouette with hood) -->
+    <path d="M85 38 Q85 22 105 22 Q125 22 125 38 L125 65 L85 65 Z" fill="#3e2723"/>
+    <ellipse cx="105" cy="50" rx="14" ry="16" fill="#d7ccc8"/>
+    <circle cx="100" cy="48" r="2" fill="#000"/><circle cx="110" cy="48" r="2" fill="#000"/>
+    <rect x="90" y="65" width="30" height="45" fill="#3e2723"/>
+    <text x="105" y="115" text-anchor="middle" fill="#fff" font-size="8" font-family="Orbitron">?</text>
+    <!-- Plo Koon-ish with mask -->
+    <ellipse cx="160" cy="55" rx="22" ry="24" fill="#ff7043"/>
+    <ellipse cx="160" cy="60" rx="14" ry="10" fill="#37474f"/>
+    <circle cx="153" cy="58" r="3" fill="#222"/><circle cx="167" cy="58" r="3" fill="#222"/>
+    <rect x="148" y="80" width="24" height="32" fill="#37474f"/>
+    <!-- Sebulba-ish -->
+    <ellipse cx="200" cy="60" rx="14" ry="16" fill="#bf6f3a"/>
+    <circle cx="196" cy="56" r="2" fill="#000"/><circle cx="204" cy="56" r="2" fill="#000"/>
+    <path d="M188 75 L212 75 L208 110 L192 110 Z" fill="#8d6e63"/>
+  </svg>`,
+
+  planets: `<svg viewBox="0 0 240 100">
+    <!-- Tatooine -->
+    <circle cx="35" cy="50" r="22" fill="#e6a64f"/>
+    <circle cx="28" cy="42" r="4" fill="#c98935"/>
+    <circle cx="40" cy="58" r="6" fill="#c98935"/>
+    <!-- Hoth -->
+    <circle cx="90" cy="50" r="22" fill="#e0f7fa" stroke="#b2ebf2" stroke-width="1"/>
+    <path d="M75 45 Q90 50 105 45" stroke="#b2ebf2" stroke-width="1.5" fill="none"/>
+    <!-- Mustafar -->
+    <circle cx="145" cy="50" r="22" fill="#3d2818"/>
+    <path d="M125 45 Q140 38 155 50 Q165 58 165 50" stroke="#ff6f00" stroke-width="2" fill="none"/>
+    <circle cx="138" cy="55" r="3" fill="#ff6f00"/>
+    <!-- Kashyyyk -->
+    <circle cx="200" cy="50" r="22" fill="#2e7d32"/>
+    <path d="M180 50 Q200 30 220 50 Q200 70 180 50" fill="#1b5e20" opacity=".6"/>
+  </svg>`,
+
+  droids: `<svg viewBox="0 0 240 120">
+    <!-- R2-D2 -->
+    <rect x="20" y="40" width="30" height="50" rx="3" fill="#eee"/>
+    <path d="M20 40 Q20 20 35 20 Q50 20 50 40 Z" fill="#bbb"/>
+    <circle cx="35" cy="32" r="5" fill="#1a1a1a"/>
+    <circle cx="35" cy="32" r="2" fill="#4FC3F7"/>
+    <rect x="22" y="50" width="26" height="3" fill="#4FC3F7"/>
+    <rect x="22" y="60" width="26" height="3" fill="#1976d2"/>
+    <!-- BB-8 -->
+    <circle cx="95" cy="75" r="20" fill="#fff" stroke="#888" stroke-width="1"/>
+    <circle cx="88" cy="70" r="5" fill="#ff7043"/>
+    <circle cx="100" cy="80" r="3" fill="#ff7043"/>
+    <ellipse cx="95" cy="48" rx="14" ry="10" fill="#fff" stroke="#888"/>
+    <circle cx="92" cy="46" r="3" fill="#1a1a1a"/>
+    <!-- C-3PO -->
+    <ellipse cx="155" cy="35" rx="11" ry="14" fill="#FFE81F"/>
+    <circle cx="151" cy="33" r="2.5" fill="#000"/><circle cx="159" cy="33" r="2.5" fill="#000"/>
+    <rect x="148" y="48" width="14" height="40" fill="#FFE81F"/>
+    <rect x="146" y="50" width="18" height="3" fill="#888"/>
+    <!-- Salacious Crumb (the IMPOSTER — orange creature, not a droid) -->
+    <ellipse cx="210" cy="65" rx="16" ry="14" fill="#d84315"/>
+    <ellipse cx="210" cy="50" rx="11" ry="9" fill="#ff8a65"/>
+    <circle cx="206" cy="50" r="2" fill="#000"/><circle cx="214" cy="50" r="2" fill="#000"/>
+    <path d="M204 55 Q210 60 216 55" stroke="#000" stroke-width="1.5" fill="none"/>
+    <path d="M198 38 L194 28 M222 38 L226 28" stroke="#d84315" stroke-width="2"/>
+    <text x="210" y="110" text-anchor="middle" fill="#fff" font-size="8" font-family="Orbitron">?</text>
+  </svg>`,
+
+  filmReel: `<svg viewBox="0 0 140 120">
+    <circle cx="70" cy="55" r="48" fill="#1a1a1a" stroke="#FFE81F" stroke-width="2"/>
+    <circle cx="70" cy="55" r="10" fill="#FFE81F"/>
+    <g fill="#0a0a0a">
+      <circle cx="70" cy="20" r="6"/><circle cx="70" cy="90" r="6"/>
+      <circle cx="35" cy="55" r="6"/><circle cx="105" cy="55" r="6"/>
+      <circle cx="45" cy="30" r="5"/><circle cx="95" cy="30" r="5"/>
+      <circle cx="45" cy="80" r="5"/><circle cx="95" cy="80" r="5"/>
+    </g>
+    <rect x="20" y="108" width="100" height="8" fill="#333"/>
+    <rect x="30" y="108" width="6" height="8" fill="#FFE81F"/>
+    <rect x="50" y="108" width="6" height="8" fill="#FFE81F"/>
+    <rect x="70" y="108" width="6" height="8" fill="#FFE81F"/>
+    <rect x="90" y="108" width="6" height="8" fill="#FFE81F"/>
+  </svg>`,
+
+  star: `<svg viewBox="0 0 120 120">
+    <polygon points="60,10 73,45 110,45 80,68 92,105 60,82 28,105 40,68 10,45 47,45"
+             fill="#FFE81F" stroke="#b89c00" stroke-width="2"
+             filter="drop-shadow(0 0 8px rgba(255,232,31,.6))"/>
+    <text x="60" y="68" text-anchor="middle" fill="#1a1a1a" font-size="14" font-weight="900" font-family="Orbitron">SW</text>
+  </svg>`,
+
+  falcon: `<svg viewBox="0 0 200 100">
+    <ellipse cx="100" cy="50" rx="80" ry="32" fill="#bbb" stroke="#333" stroke-width="2"/>
+    <circle cx="100" cy="50" r="22" fill="#999" stroke="#222" stroke-width="1"/>
+    <rect x="170" y="42" width="22" height="16" fill="#666"/>
+    <rect x="172" y="38" width="18" height="4" fill="#888"/>
+    <rect x="172" y="58" width="18" height="4" fill="#888"/>
+    <path d="M30 32 L4 22 L4 32 Z M30 68 L4 78 L4 68 Z" fill="#888"/>
+    <circle cx="100" cy="50" r="6" fill="#4FC3F7"/>
+    <line x1="100" y1="22" x2="100" y2="78" stroke="#444" stroke-width=".7"/>
+    <line x1="40" y1="50" x2="160" y2="50" stroke="#444" stroke-width=".7"/>
+  </svg>`,
+
+  saberPurple: `<svg viewBox="0 0 160 200">
+    <defs>
+      <linearGradient id="bladePurple" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#444"/>
+        <stop offset="0.12" stop-color="#888"/>
+        <stop offset="0.18" stop-color="#fff"/>
+        <stop offset="1" stop-color="#B388FF"/>
+      </linearGradient>
+    </defs>
+    <rect x="74" y="170" width="12" height="22" fill="#222"/>
+    <rect x="70" y="135" width="20" height="35" fill="#888" stroke="#333"/>
+    <rect x="74" y="125" width="12" height="10" fill="#666"/>
+    <rect x="76" y="10" width="8" height="115" rx="4" fill="url(#bladePurple)"
+          filter="drop-shadow(0 0 12px #B388FF)"/>
+  </svg>`,
+
+  musicNote: `<svg viewBox="0 0 110 120">
+    <ellipse cx="28" cy="92" rx="16" ry="11" fill="#FFE81F" stroke="#b89c00" stroke-width="1.5"/>
+    <rect x="42" y="22" width="6" height="73" fill="#FFE81F"/>
+    <ellipse cx="78" cy="78" rx="16" ry="11" fill="#FFE81F" stroke="#b89c00" stroke-width="1.5"/>
+    <rect x="92" y="8" width="6" height="73" fill="#FFE81F"/>
+    <path d="M48 22 Q70 18 98 8 L98 22 Q70 32 48 36 Z" fill="#FFE81F"/>
+    <circle cx="14" cy="40" r="3" fill="#FFE81F" opacity=".7"/>
+    <circle cx="6" cy="58" r="2" fill="#FFE81F" opacity=".5"/>
+  </svg>`,
+
+  timeline: `<svg viewBox="0 0 200 100">
+    <line x1="10" y1="50" x2="190" y2="50" stroke="#FFE81F" stroke-width="2"/>
+    <g fill="#FFE81F">
+      <circle cx="30" cy="50" r="6"/><circle cx="80" cy="50" r="6"/>
+      <circle cx="130" cy="50" r="6"/><circle cx="180" cy="50" r="6"/>
+    </g>
+    <g fill="#bbb" font-family="Orbitron" font-size="11" text-anchor="middle">
+      <text x="30" y="78">1977</text><text x="80" y="78">1980</text>
+      <text x="130" y="78">1983</text><text x="180" y="78">1999</text>
+    </g>
+    <text x="100" y="28" text-anchor="middle" fill="#FFE81F" font-family="Orbitron" font-size="12" letter-spacing="2">EPISODE TIMELINE</text>
+  </svg>`,
+
+  grogu: `<svg viewBox="0 0 120 130">
+    <ellipse cx="60" cy="115" rx="40" ry="10" fill="#3e2723" opacity=".5"/>
+    <path d="M28 90 Q28 65 60 65 Q92 65 92 90 L92 118 L28 118 Z" fill="#a1887f"/>
+    <ellipse cx="60" cy="55" rx="28" ry="26" fill="#aed581"/>
+    <path d="M30 50 L8 30 L24 58 Z" fill="#aed581"/>
+    <path d="M90 50 L112 30 L96 58 Z" fill="#aed581"/>
+    <ellipse cx="48" cy="58" rx="5" ry="6" fill="#1a1a1a"/>
+    <ellipse cx="72" cy="58" rx="5" ry="6" fill="#1a1a1a"/>
+    <ellipse cx="46" cy="56" rx="1.5" ry="2" fill="#fff"/>
+    <ellipse cx="70" cy="56" rx="1.5" ry="2" fill="#fff"/>
+    <path d="M52 72 Q60 76 68 72" stroke="#1a1a1a" stroke-width="1.5" fill="none"/>
+    <ellipse cx="42" cy="68" rx="3" ry="2" fill="#f48fb1" opacity=".6"/>
+    <ellipse cx="78" cy="68" rx="3" ry="2" fill="#f48fb1" opacity=".6"/>
+  </svg>`
+};
+
+/* =============================================================
+   QUESTION BANK
+   ============================================================= */
+const QUESTIONS = [
+  {
+    art: ART.yoda,
+    crawl: 'Yoda lifts the X-wing from the swamp and tells you...\n"Do or do not. ____"',
+    options: ['Try harder, you must', 'There is no try', 'There is only failure', 'Use the Force'],
+    correct: 1,
+    note: 'Yoda — The Empire Strikes Back. Patience, padawan.'
+  },
+  {
+    art: ART.vader,
+    crawl: 'Vader force-chokes an officer and growls...\n"I find your lack of faith ____"',
+    options: ['amusing', 'disturbing', 'troubling', 'weak'],
+    correct: 1,
+    note: 'Darth Vader — A New Hope.'
+  },
+  {
+    art: ART.cantina,
+    crawl: 'One of these characters is not from a galaxy far, far away.\nWhich one snuck in from another franchise?',
+    options: ['Bib Fortuna', 'Sebulba', 'Aragorn', 'Plo Koon'],
+    correct: 2,
+    note: 'Aragorn is from Lord of the Rings. The other three are deep-cut Star Wars canon.'
+  },
+  {
+    art: ART.planets,
+    crawl: 'Hyperspace has dropped you out near a familiar planet...\nbut one of these is NOT in the Star Wars galaxy.',
+    options: ['Mustafar', 'Arrakis', 'Crait', 'Kashyyyk'],
+    correct: 1,
+    note: 'Arrakis is from Dune. Mustafar (lava), Crait (salt), Kashyyyk (Wookiees) are all canon.'
+  },
+  {
+    art: ART.droids,
+    crawl: 'The cantina is crawling with droids and aliens.\nWhich of these is NOT actually a droid?',
+    options: ['IG-88', 'BB-8', 'Salacious B. Crumb', 'K-2SO'],
+    correct: 2,
+    note: "Salacious Crumb is a Kowakian monkey-lizard — Jabba's pet jester."
+  },
+  {
+    art: ART.filmReel,
+    crawl: 'Place these characters in order of their first appearance\nin a Star Wars FILM (earliest first).',
+    options: [
+      'Jar Jar → Boba Fett → Kylo Ren → Cassian',
+      'Boba Fett → Jar Jar → Kylo Ren → Cassian',
+      'Boba Fett → Jar Jar → Cassian → Kylo Ren',
+      'Boba Fett → Kylo Ren → Jar Jar → Cassian'
+    ],
+    correct: 1,
+    note: 'Boba (1980, Empire) → Jar Jar (1999, Phantom Menace) → Kylo (2015, Force Awakens) → Cassian (2016, Rogue One).'
+  },
+  {
+    art: ART.star,
+    crawl: 'Many famous actors have made cameos in Star Wars films.\nWhich of these has NEVER appeared in one?',
+    options: [
+      'Daniel Craig (TFA stormtrooper)',
+      'Simon Pegg (Unkar Plutt)',
+      "Lupita Nyong'o (Maz Kanata)",
+      'Robert Downey Jr.'
+    ],
+    correct: 3,
+    note: 'RDJ stays in the MCU. The other three are all in Disney-era Star Wars.'
+  },
+  {
+    art: ART.falcon,
+    crawl: 'Han Solo defends his odds of survival in an asteroid field...\n"Never tell me ____"',
+    options: ['the score', 'the truth', 'the odds', 'the plan'],
+    correct: 2,
+    note: 'Han Solo — The Empire Strikes Back. Classic.'
+  },
+  {
+    art: ART.saberPurple,
+    crawl: 'A Jedi Master walks into the Council chamber\nwielding a unique color of lightsaber.\nWhich color belonged to Mace Windu?',
+    options: ['Green', 'Purple', 'Yellow', 'Red'],
+    correct: 1,
+    note: 'Purple — chosen by Samuel L. Jackson so he could spot himself in the big battle scenes.'
+  },
+  {
+    art: ART.grogu,
+    crawl: 'A small green child appears in a floating pram...\nWhat species is Grogu (a.k.a. "Baby Yoda")?',
+    options: [
+      'Officially unnamed — same as Yoda and Yaddle',
+      'Whill', 'Force-sensitive Hutt', 'Padawan'
+    ],
+    correct: 0,
+    note: "Lucasfilm has never officially named the species. They're still being mysterious."
+  },
+  {
+    art: ART.musicNote,
+    crawl: 'A symphony orchestra strikes the iconic opening fanfare.\nWho composed the Star Wars main theme?',
+    options: ['Hans Zimmer', 'John Williams', 'James Horner', 'Howard Shore'],
+    correct: 1,
+    note: 'John Williams. He won the Academy Award for Best Original Score for Star Wars (1977).'
+  },
+  {
+    art: ART.timeline,
+    crawl: 'The first Star Wars film opened in just a few dozen theaters\nand became a cultural earthquake.\nIn what year was it released?',
+    options: ['1975', '1977', '1979', '1980'],
+    correct: 1,
+    note: 'May 25, 1977. The original title was simply "Star Wars" — "Episode IV: A New Hope" was added later.'
+  },
+  {
+    art: ART.star,
+    crawl: 'The visionary behind a galaxy far, far away...\nWho created Star Wars?',
+    options: ['Steven Spielberg', 'Gene Roddenberry', 'George Lucas', 'Ridley Scott'],
+    correct: 2,
+    note: 'George Lucas — founder of Lucasfilm and Industrial Light & Magic.'
+  },
+  {
+    art: ART.filmReel,
+    crawl: 'The plot of A New Hope was heavily influenced\nby a 1958 Akira Kurosawa film. Which one?',
+    options: ['Seven Samurai', 'Yojimbo', 'The Hidden Fortress', 'Rashomon'],
+    correct: 2,
+    note: 'The Hidden Fortress — two bickering peasants (proto R2 + 3PO) escort a princess across enemy lines.'
+  },
+  {
+    art: ART.yoda,
+    crawl: 'A loyal furry companion inspired one of the most\nbeloved Star Wars characters. Whose pet was it?',
+    options: ["George Lucas's dog Indiana", "Steven Spielberg's cat", "Mark Hamill's parrot", "Harrison Ford's horse"],
+    correct: 0,
+    note: "Lucas's Alaskan Malamute Indiana inspired Chewbacca — and later, the name Indiana Jones."
+  },
+  {
+    art: ART.deathStar,
+    crawl: 'In 2012 the Star Wars universe changed hands\nfor over $4 billion. Who acquired Lucasfilm?',
+    options: ['Warner Bros.', 'Disney', 'Universal', 'Paramount'],
+    correct: 1,
+    note: 'Disney — the deal closed in October 2012 for $4.05 billion in cash and stock.'
+  },
+  {
+    art: ART.musicNote,
+    crawl: 'The unmistakable lightsaber hum was created from\nan unusual pair of everyday sounds. Which?',
+    options: ['Synthesizer keyboard', 'Film projector motor + TV interference', 'Vacuum cleaner', 'Tibetan singing bowls'],
+    correct: 1,
+    note: 'Sound designer Ben Burtt combined the hum of an old projector with a microphone picking up TV interference.'
+  },
+  {
+    art: ART.timeline,
+    crawl: 'Place these original films in order of release year.',
+    options: [
+      'New Hope → Empire → Jedi → Phantom Menace',
+      'Empire → New Hope → Jedi → Phantom Menace',
+      'Phantom Menace → New Hope → Empire → Jedi',
+      'New Hope → Jedi → Empire → Phantom Menace'
+    ],
+    correct: 0,
+    note: 'A New Hope (1977) → Empire (1980) → Jedi (1983) → Phantom Menace (1999).'
+  },
+  {
+    art: ART.cantina,
+    crawl: 'A Mon Calamari admiral spots an ambush at Endor\nand cries out two famous words.',
+    options: ['"It is a trick!"', '"It is a trap!"', '"It is a bluff!"', '"It is a test!"'],
+    correct: 1,
+    note: 'Admiral Ackbar — Return of the Jedi.'
+  },
+  {
+    art: ART.saberPurple,
+    crawl: 'Sith Lords share a unique naming convention.\nWhich of these is NOT a real Sith from canon?',
+    options: ['Darth Maul', 'Darth Sidious', 'Darth Plagueis', 'Darth Indiana'],
+    correct: 3,
+    note: 'Darth Indiana is fake. Maul, Sidious (the Emperor), and Plagueis are all canon.'
+  },
+  {
+    art: ART.grogu,
+    crawl: "Yoda's species has only a few named members in canon.\nWhich of these is NOT one of them?",
+    options: ['Yoda', 'Yaddle', 'Grogu', 'Yzma'],
+    correct: 3,
+    note: 'Yzma is from "The Emperor\'s New Groove." Yoda, Yaddle, and Grogu are the named canon members.'
+  },
+  {
+    art: ART.musicNote,
+    crawl: 'A reused stock sound effect appears in nearly\nevery theatrical Star Wars film. What is it called?',
+    options: ['The Howie scream', 'The Wilhelm scream', 'The Goofy holler', 'The TARDIS hum'],
+    correct: 1,
+    note: 'The Wilhelm scream — first used in 1951, reused as an inside joke by sound designer Ben Burtt.'
+  },
+  {
+    art: ART.cantina,
+    crawl: '"I have a bad feeling about this."\nWhere does this line appear?',
+    options: ['Only A New Hope', 'Every theatrical Star Wars film', 'Only the prequels', 'Only the original trilogy'],
+    correct: 1,
+    note: 'A variation appears in every theatrical Star Wars film — a recurring inside joke.'
+  },
+  {
+    art: ART.planets,
+    crawl: 'The political and spiritual heart of the galaxy.\nWhere is the Jedi Temple located?',
+    options: ['Coruscant', 'Naboo', 'Tatooine', 'Yavin 4'],
+    correct: 0,
+    note: 'Coruscant — the city-planet capital of the Republic.'
+  },
+  {
+    art: ART.deathStar,
+    crawl: "The first Death Star demonstrated its power by\nobliterating Princess Leia's home planet. Which?",
+    options: ['Alderaan', 'Mandalore', 'Lothal', 'Jakku'],
+    correct: 0,
+    note: "Alderaan — destroyed by Grand Moff Tarkin to demonstrate the Death Star's power."
+  },
+  {
+    art: ART.grogu,
+    crawl: 'A bounty hunter and a small green child changed\nstreaming TV. When did The Mandalorian premiere?',
+    options: ['2017', '2019', '2020', '2021'],
+    correct: 1,
+    note: 'November 12, 2019 — the launch title for Disney+.'
+  },
+  {
+    art: ART.vader,
+    crawl: 'Darth Vader was famously portrayed by\ntwo different performers. How was that split?',
+    options: [
+      'James Earl Jones voice + David Prowse body',
+      'Hayden Christensen alone',
+      'David Prowse alone',
+      'James Earl Jones alone'
+    ],
+    correct: 0,
+    note: 'David Prowse wore the suit; James Earl Jones provided the iconic voice in post.'
+  },
+  {
+    art: ART.vader,
+    crawl: 'On Cloud City a father reveals a shocking truth.\n"No, I am your ____."',
+    options: ['Master', 'Father', 'Brother', 'Friend'],
+    correct: 1,
+    note: 'Vader to Luke — The Empire Strikes Back. Often misquoted as "Luke, I am your father."'
+  },
+  {
+    art: ART.filmReel,
+    crawl: 'The signature scrolling opening text was inspired\nby a 1930s movie serial. Which?',
+    options: ['Buck Rogers', 'Flash Gordon', 'The Phantom', 'The Lone Ranger'],
+    correct: 1,
+    note: "Flash Gordon — Lucas originally wanted to make a Flash Gordon film but couldn't get the rights."
+  },
+  {
+    art: ART.saberPurple,
+    crawl: 'Beyond the typical blue, green, and red...\nwhich lightsaber color is canonically Jedi-only?',
+    options: ['Yellow (Jedi Sentinels / Temple Guards)', 'Black (Darksaber)', 'White', 'Orange'],
+    correct: 0,
+    note: 'Yellow — wielded by Jedi Sentinels and Temple Guards. The Darksaber is a unique Mandalorian weapon.'
+  }
+];
+
+/* How many of the 30-question bank to ask per run */
+const QUESTIONS_PER_RUN = 10;
+
+/* Pick a random subset and shuffle option orders within each question */
+function buildRunQuestions() {
+  const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5);
+  const subset = shuffled.slice(0, Math.min(QUESTIONS_PER_RUN, shuffled.length));
+  return subset.map(q => {
+    const correctVal = q.options[q.correct];
+    const opts = [...q.options].sort(() => Math.random() - 0.5);
+    return { ...q, options: opts, correct: opts.indexOf(correctVal) };
+  });
+}
+let RUN = []; // questions for the current run
+
+const PUNS_GOOD = [
+  '"Impressive. Most impressive."',
+  '"The Force is strong with this one."',
+  '"You may yet make a Jedi after all."',
+  '"Stay on target..."',
+  '"Great, kid. Don\'t get cocky."'
+];
+const PUNS_BAD = [
+  '"These weren\'t the answers you were looking for."',
+  '"Do or do not. There is no maybe."',
+  '"I find your lack of correct answers disturbing."',
+  '"The dark side clouds everything."',
+  '"It\'s a trap! ...Said your last guess."'
+];
+const PUNS_FINAL = [
+  '"You\'ve taken your first step into a larger world."',
+  '"The Force will be with you. Always."',
+  '"A Jedi craves not these things... but high scores, sure."',
+  '"You were the chosen one!"'
+];
+
+/* =============================================================
+   STATE + NAVIGATION
+   ============================================================= */
+const TIMER_SECONDS = 120;
+let state = {
+  user: '', side: null, qIdx: 0, score: 0, correctCount: 0,
+  totalTimeMs: 0, qStart: 0, timerHandle: null,
+  secondsLeft: TIMER_SECONDS, locked: false
+};
+const $ = (id) => document.getElementById(id);
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  document.body.classList.toggle('quiz-mode', id === 'screen-quiz');
+}
+
+/* SPLASH → INTRO */
+$('btn-begin').addEventListener('click', () => { audio(); SFX.saber(); startMusic(); playIntro(); });
+$('btn-begin-mute').addEventListener('click', () => { audio(); SFX.saber(); playIntro(); });
+$('btn-skip-intro').addEventListener('click', () => { show('screen-login'); });
+$('link-replay-intro').addEventListener('click', (e) => { e.preventDefault(); audio(); SFX.saber(); playIntro(); });
+
+let _introTimer = null;
+function playIntro() {
+  show('screen-intro');
+  // Reset CSS animations by cloning each animated element.
+  ['intro-prelude', 'intro-logo', 'intro-crawl-stage'].forEach(cls => {
+    const el = document.querySelector('#screen-intro .' + cls);
+    if (el) {
+      const clone = el.cloneNode(true);
+      el.parentNode.replaceChild(clone, el);
+    }
+  });
+  scheduleIntroEnd();
+}
+function scheduleIntroEnd() {
+  // Total intro duration ≈ 74s (prelude 6s + logo 8s + crawl 60s)
+  clearTimeout(_introTimer);
+  _introTimer = setTimeout(() => {
+    if (document.getElementById('screen-intro').classList.contains('active')) {
+      show('screen-login');
+    }
+  }, 70000);
+}
+
+/* =============================================================
+   STAR WARS NAME GENERATOR (made-up syllables, no canon names)
+   ============================================================= */
+const _pick = (a) => a[Math.floor(Math.random() * a.length)];
+const NAMEGEN = {
+  jedi() {
+    const a = ['Bo','Kal','Ren','Tess','Jix','Mon','Tav','Kor','Vex','Zar','Nyx','Lux','Thra','Sol','Wren','Drev','Quay','Pax','Aur','Mira','Fenn','Vel','Dax','Lor','Eth','Sho','Ari','Jen','Cal'];
+    const b = ['o','a','an','en','ar','i','aro','ek','ix','ya','el','un'];
+    const c = ['Vor','Tan','Mar','Kel','Nar','Dro','Cor','Skar','Tor','Pyr','Quel','Bri','Vand','Yor','Sho','Tael','Ren','Mir'];
+    const d = ['eth','ek','ius','an','os','ari','ix','aro','ynn','ar','ael'];
+    const title = Math.random() < 0.4 ? _pick(['Master ','Padawan ','Knight ']) : '';
+    return title + _pick(a) + _pick(b) + ' ' + _pick(c) + _pick(d);
+  },
+  sith() {
+    const a = ['Vor','Krath','Mal','Zar','Nyx','Hex','Drax','Thane','Vex','Skarn','Mor','Korr','Vael','Pyr','Ozar','Rav','Kael','Nox','Strad','Vorn'];
+    const b = ['ek','os','ius','un','aro','ax','en','etz','an','ix'];
+    return 'Darth ' + _pick(a) + _pick(b);
+  },
+  bh() {
+    const a = ['Mira','Jix','Vex','Dax','Bo','Cad','Korr','Reva','Zev','Nyx','Tess','Quay','Hex','Vyn','Skar','Tann','Krell','Drez'];
+    const nick = ['"Trigger"','"Hex"','"Slug"','"Coda"','"Fang"','"Crater"','"Sparks"','"Tag"','"Shadow"','"Krayt"','"Iron"','"Tracer"'];
+    const c = ['Drova','Karn','Vex','Krall','Dren','Skarn','Vorn','Tann','Wraith','Korr','Mox','Vel','Strix','Quor','Dax'];
+    return Math.random() < 0.55
+      ? _pick(a) + ' ' + _pick(nick) + ' ' + _pick(c)
+      : _pick(a) + ' ' + _pick(c);
+  },
+  droid() {
+    const L = 'BCDEFHKMNPRSTVXZ'.split('');
+    const N = () => Math.floor(Math.random() * 90) + 10;
+    const styles = [
+      () => `${_pick(L)}${_pick(L)}-${N()}`,
+      () => `${_pick(L)}${N()}-${_pick(L)}${Math.floor(Math.random()*9)}`,
+      () => `${_pick(L)}${N()}-${_pick(['DO','PO','SX','TX','KX','PX','MN','VR'])}`,
+      () => `${_pick(['Q','J','K','M','T'])}-${N()}${_pick(L)}`
+    ];
+    return _pick(styles)();
+  }
+};
+document.querySelectorAll('.namegen-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    audio(); SFX.click();
+    $('username').value = NAMEGEN[btn.dataset.gen]();
+    $('username').focus();
+  });
+});
+
+/* LOGIN → SIDE */
+$('btn-to-side').addEventListener('click', () => {
+  const name = $('username').value.trim();
+  if (!name) { $('username').focus(); return; }
+  state.user = name;
+  show('screen-side');
+});
+$('username').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-to-side').click(); });
+
+document.querySelectorAll('.side-card').forEach(card => {
+  card.addEventListener('click', () => { SFX.saber(); state.side = card.dataset.side; startQuiz(); });
+});
+
+/* =============================================================
+   QUIZ FLOW
+   ============================================================= */
+function startQuiz() {
+  RUN = buildRunQuestions();   // randomize subset + option order each run
+  state.qIdx = 0; state.score = 0; state.correctCount = 0; state.totalTimeMs = 0;
+  $('qm-name').textContent  = state.user;
+  $('qm-side').innerHTML    = state.side === 'light'
+      ? '<span class="side-light">⚔ LIGHT SIDE</span>'
+      : '<span class="side-dark">⚔ DARK SIDE</span>';
+  $('qm-total').textContent = RUN.length;
+  show('screen-quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = RUN[state.qIdx];
+  state.locked = false;
+  state.secondsLeft = TIMER_SECONDS;
+  state.qStart = performance.now();
+  $('qm-num').textContent   = state.qIdx + 1;
+  $('qm-score').textContent = state.score;
+  $('feedback').className = 'feedback';
+  $('feedback').textContent = '';
+
+  // Set themed art
+  $('q-art').innerHTML = q.art || '';
+
+  // Crawl re-trigger by replacing element (restarts CSS animation)
+  const oldCrawl = $('crawl');
+  const newCrawl = oldCrawl.cloneNode(false);
+  newCrawl.id = 'crawl';
+  newCrawl.className = 'crawl';
+  newCrawl.innerHTML = q.crawl.split('\n').map(l => `<div>${l}</div>`).join('');
+  oldCrawl.parentNode.replaceChild(newCrawl, oldCrawl);
+
+  // Build answers
+  const wrap = $('answers'); wrap.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="key">${String.fromCharCode(65 + i)}</span><span>${opt}</span>`;
+    btn.addEventListener('click', () => answer(i));
+    wrap.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function startTimer() {
+  const ring = document.querySelector('.ring-fg');
+  const CIRC = 2 * Math.PI * 24;
+  ring.classList.remove('warn', 'danger');
+  ring.style.strokeDashoffset = '0';
+  $('timer-num').textContent = state.secondsLeft;
+  $('timer-num').classList.toggle('three', state.secondsLeft >= 100);
+
+  clearInterval(state.timerHandle);
+  state.timerHandle = setInterval(() => {
+    state.secondsLeft--;
+    $('timer-num').textContent = state.secondsLeft;
+    $('timer-num').classList.toggle('three', state.secondsLeft >= 100);
+    const frac = (TIMER_SECONDS - state.secondsLeft) / TIMER_SECONDS;
+    ring.style.strokeDashoffset = (CIRC * frac).toFixed(2);
+    if (state.secondsLeft <= 30) ring.classList.add('warn');
+    if (state.secondsLeft <= 10) { ring.classList.remove('warn'); ring.classList.add('danger'); }
+    if (state.secondsLeft > 0 && state.secondsLeft <= 5) SFX.tick();
+    if (state.secondsLeft <= 0)  { stopTimer(); answer(-1); }
+  }, 1000);
+}
+function stopTimer() { clearInterval(state.timerHandle); state.timerHandle = null; }
+
+function answer(idx) {
+  if (state.locked) return;
+  state.locked = true;
+  stopTimer();
+  const q = RUN[state.qIdx];
+  state.totalTimeMs += performance.now() - state.qStart;
+
+  const correct = (idx === q.correct);
+  let pts = 0;
+  if (correct) {
+    pts = 100 + Math.max(0, state.secondsLeft) * 10;
+    state.score += pts;
+    state.correctCount++;
+    SFX.correct();
+  } else {
+    SFX.wrong();
+  }
+
+  document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === idx)  btn.classList.add('wrong');
+  });
+
+  const fb = $('feedback');
+  fb.className = 'feedback show ' + (correct ? 'good' : 'bad');
+  const pun = correct
+      ? PUNS_GOOD[Math.floor(Math.random() * PUNS_GOOD.length)]
+      : (idx === -1 ? '"You ran out of time. The Force was not with you."'
+                    : PUNS_BAD[Math.floor(Math.random() * PUNS_BAD.length)]);
+  fb.innerHTML = `<b>${correct ? `+${pts} points` : (idx === -1 ? 'TIME!' : 'INCORRECT')}</b> — ${pun}<br>
+                  <span style="color:#aaa;font-size:13px">${q.note}</span>`;
+
+  $('qm-score').textContent = state.score;
+
+  setTimeout(() => {
+    state.qIdx++;
+    if (state.qIdx >= RUN.length) finishQuiz();
+    else loadQuestion();
+  }, 2400);
+}
+
+/* =============================================================
+   FINISH + LEADERBOARD
+   ============================================================= */
+function finishQuiz() {
+  SFX.boom();
+  const totalSec = Math.round(state.totalTimeMs / 1000);
+  $('final-score').textContent   = state.score;
+  $('final-correct').textContent = `${state.correctCount}/${RUN.length}`;
+  $('final-time').textContent    = totalSec;
+  $('final-pun').textContent     = PUNS_FINAL[Math.floor(Math.random() * PUNS_FINAL.length)];
+
+  const board = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
+  board.push({
+    name: state.user, side: state.side,
+    score: state.score, correct: state.correctCount,
+    timeSec: totalSec, ts: Date.now()
+  });
+  localStorage.setItem('sw_leaderboard', JSON.stringify(board));
+
+  show('screen-results');
+}
+
+$('btn-to-leader').addEventListener('click', renderLeaderboard);
+$('btn-replay').addEventListener('click', () => { show('screen-login'); $('username').value = state.user; });
+
+/* Backend-only utility: open browser console and run clearLeaderboard()
+   to reset scores for this device. Intentionally not exposed in the UI. */
+window.clearLeaderboard = function() {
+  localStorage.removeItem('sw_leaderboard');
+  if (document.getElementById('screen-leader').classList.contains('active')) renderLeaderboard();
+  console.log('Leaderboard cleared.');
+};
+
+function renderLeaderboard() {
+  show('screen-leader');
+  const board = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
+  const light = board.filter(e => e.side === 'light').sort(sortBy);
+  const dark  = board.filter(e => e.side === 'dark').sort(sortBy);
+  fillTable('table-light', light);
+  fillTable('table-dark',  dark);
+  const totalLight = light.reduce((s, e) => s + e.score, 0);
+  const totalDark  = dark .reduce((s, e) => s + e.score, 0);
+  $('total-light').textContent = totalLight.toLocaleString();
+  $('total-dark').textContent  = totalDark.toLocaleString();
+  $('count-light').textContent = light.length;
+  $('count-dark').textContent  = dark.length;
+  let banner = '— Awaiting challengers —';
+  if (totalLight === 0 && totalDark === 0) {/* default */}
+  else if (totalLight > totalDark) banner = '★ The Light Side Prevails ★';
+  else if (totalDark > totalLight) banner = '☠ The Dark Side Reigns ☠';
+  else banner = '⚔ Balance in the Force ⚔';
+  $('winner-banner').textContent = banner;
+}
+function sortBy(a, b) {
+  if (b.score !== a.score) return b.score - a.score;
+  return a.timeSec - b.timeSec;
+}
+function fillTable(id, rows) {
+  const tbody = document.querySelector(`#${id} tbody`);
+  tbody.innerHTML = '';
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#666;padding:18px">No scores yet</td></tr>`;
+    return;
+  }
+  rows.slice(0, 10).forEach((r, i) => {
+    const tr = document.createElement('tr');
+    if (r.name === state.user) tr.className = 'me';
+    tr.innerHTML = `<td>${i+1}</td><td>${escapeHtml(r.name)}</td>
+                    <td><b>${r.score}</b></td><td>${r.timeSec}s</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* =============================================================
+   EASTER EGG — flying ships you can shoot down
+   Custom SVG shapes (no external assets).
+   Click a TIE / X-wing → 1 hit kills.
+   Click the Death Star → 3 hits to destroy (big kaboom).
+   ============================================================= */
+const SHIP_SVGS = {
+  tie: `<svg viewBox="0 0 60 40" width="100%" height="100%">
+    <rect x="0" y="2" width="8" height="36" fill="#1a1a1a" stroke="#888" stroke-width="1"/>
+    <rect x="52" y="2" width="8" height="36" fill="#1a1a1a" stroke="#888" stroke-width="1"/>
+    <line x1="8" y1="20" x2="22" y2="20" stroke="#888" stroke-width="2"/>
+    <line x1="38" y1="20" x2="52" y2="20" stroke="#888" stroke-width="2"/>
+    <circle cx="30" cy="20" r="9" fill="#2a2a2a" stroke="#bbb" stroke-width="1.5"/>
+    <circle cx="30" cy="20" r="3" fill="#666"/>
+  </svg>`,
+  xwing: `<svg viewBox="0 0 70 50" width="100%" height="100%">
+    <path d="M2 23 L52 21 L68 25 L52 29 L2 27 Z" fill="#bbb" stroke="#444" stroke-width="1"/>
+    <path d="M16 22 L34 4 L40 4 L24 22 Z" fill="#aaa" stroke="#444"/>
+    <path d="M16 28 L34 46 L40 46 L24 28 Z" fill="#aaa" stroke="#444"/>
+    <path d="M44 22 L34 4 L28 4 L40 22 Z" fill="#999" stroke="#444"/>
+    <path d="M44 28 L34 46 L28 46 L40 28 Z" fill="#999" stroke="#444"/>
+    <rect x="32" y="2" width="6" height="3" fill="#FF3D00"/>
+    <rect x="32" y="45" width="6" height="3" fill="#FF3D00"/>
+    <circle cx="60" cy="25" r="2" fill="#4FC3F7"/>
+  </svg>`,
+  destroyer: `<svg viewBox="0 0 120 50" width="100%" height="100%">
+    <path d="M2 25 L92 12 L118 25 L92 38 Z" fill="#aaa" stroke="#555" stroke-width="1"/>
+    <rect x="78" y="18" width="20" height="14" fill="#888" stroke="#444"/>
+    <circle cx="84" cy="18" r="3" fill="#666"/>
+    <circle cx="92" cy="18" r="3" fill="#666"/>
+    <line x1="20" y1="25" x2="80" y2="25" stroke="#666" stroke-width=".5"/>
+  </svg>`,
+  deathstar: `<svg viewBox="0 0 110 110" width="100%" height="100%">
+    <defs>
+      <radialGradient id="dsfly-${Math.random().toString(36).slice(2,8)}" cx="38%" cy="38%">
+        <stop offset="0" stop-color="#ccc"/><stop offset="1" stop-color="#2a2a2a"/>
+      </radialGradient>
+    </defs>
+    <circle cx="55" cy="55" r="50" fill="#888" stroke="#222" stroke-width="1.5"/>
+    <circle cx="55" cy="55" r="50" fill="url(#dsfly)" opacity=".9"/>
+    <circle cx="36" cy="36" r="12" fill="#1a1a1a"/>
+    <circle cx="36" cy="36" r="5" fill="#000"/>
+    <line x1="6" y1="55" x2="104" y2="55" stroke="#222" stroke-width="1"/>
+    <line x1="14" y1="40" x2="96" y2="40" stroke="#3a3a3a" stroke-width=".5"/>
+    <line x1="14" y1="70" x2="96" y2="70" stroke="#3a3a3a" stroke-width=".5"/>
+  </svg>`
+};
+
+const SHIP_TYPES = [
+  // weighted by spawn probability
+  { type: 'tie',       size: 50,  hp: 1, dur: 14, weight: 5 },
+  { type: 'tie',       size: 38,  hp: 1, dur: 18, weight: 3 },
+  { type: 'xwing',     size: 60,  hp: 1, dur: 16, weight: 4 },
+  { type: 'destroyer', size: 100, hp: 2, dur: 30, weight: 1 },
+  { type: 'deathstar', size: 130, hp: 3, dur: 90, weight: 1 }
+];
+
+function pickShipType() {
+  const total = SHIP_TYPES.reduce((s, t) => s + t.weight, 0);
+  let r = Math.random() * total;
+  for (const t of SHIP_TYPES) { r -= t.weight; if (r <= 0) return t; }
+  return SHIP_TYPES[0];
+}
+
+let _deathStarOnScreen = false;
+
+function spawnShip() {
+  if (document.body.classList.contains('quiz-mode')) return;
+  if (document.hidden) return;
+
+  let cfg = pickShipType();
+  // Limit to one Death Star at a time
+  if (cfg.type === 'deathstar' && _deathStarOnScreen) cfg = SHIP_TYPES[0];
+  if (cfg.type === 'deathstar') _deathStarOnScreen = true;
+
+  // Random edge entry; exit through a different edge
+  const W = innerWidth, H = innerHeight, pad = cfg.size + 40;
+  const startEdge = Math.floor(Math.random() * 4); // 0=L,1=T,2=R,3=B
+  let endEdge = (startEdge + 1 + Math.floor(Math.random() * 3)) % 4;
+  const pos = (edge) => {
+    if (edge === 0) return [-pad, Math.random() * H];
+    if (edge === 1) return [Math.random() * W, -pad];
+    if (edge === 2) return [W + pad, Math.random() * H];
+    return [Math.random() * W, H + pad];
+  };
+  const [sx, sy] = pos(startEdge);
+  const [ex, ey] = pos(endEdge);
+  const dx = ex - sx, dy = ey - sy;
+  const rot = cfg.type === 'deathstar' ? 0 : (Math.atan2(dy, dx) * 180 / Math.PI);
+
+  const ship = document.createElement('div');
+  ship.className = 'ship';
+  ship.style.cssText = `
+    width: ${cfg.size}px; height: ${cfg.size}px;
+    left: ${sx}px; top: ${sy}px;
+    --tx: ${dx}px; --ty: ${dy}px;
+    --rot: ${rot}deg; --dur: ${cfg.dur}s;
+  `;
+  ship.innerHTML = SHIP_SVGS[cfg.type];
+  ship._hp = cfg.hp; ship._maxHp = cfg.hp; ship._type = cfg.type;
+
+  // HP indicator for multi-hit ships
+  if (cfg.hp > 1) {
+    const hp = document.createElement('div');
+    hp.className = 'ship-hp'; hp.textContent = '●'.repeat(cfg.hp);
+    ship.appendChild(hp);
+    ship._hpEl = hp;
+  }
+
+  ship.addEventListener('click', (e) => {
+    e.stopPropagation();
+    ship._hp--;
+    if (ship._hpEl) ship._hpEl.textContent = '●'.repeat(Math.max(0, ship._hp)) + '○'.repeat(ship._maxHp - Math.max(0, ship._hp));
+    if (ship._hp <= 0) {
+      explodeShip(ship);
+    } else {
+      SFX.click();
+      ship.classList.add('hit');
+      setTimeout(() => ship.classList.remove('hit'), 150);
+    }
+  });
+
+  ship.addEventListener('animationend', (e) => {
+    if (e.animationName === 'fly') {
+      if (ship._type === 'deathstar') _deathStarOnScreen = false;
+      ship.remove();
+    }
+  });
+
+  document.getElementById('ships').appendChild(ship);
+}
+
+function explodeShip(ship) {
+  const big = ship._type === 'deathstar' || ship._type === 'destroyer';
+  if (big) SFX.boom(); else SFX.wrong();
+  if (ship._type === 'deathstar') _deathStarOnScreen = false;
+
+  const rect = ship.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const container = document.getElementById('ships');
+  const N = big ? 60 : 24;
+  const palette = ['#ff7043', '#ffeb3b', '#ff5722', '#fff', '#ffc107'];
+  for (let i = 0; i < N; i++) {
+    const angle = (i / N) * Math.PI * 2 + Math.random() * 0.5;
+    const dist = (big ? 140 : 80) + Math.random() * (big ? 160 : 70);
+    const p = document.createElement('div');
+    p.className = 'boom-particle';
+    p.style.left = cx + 'px'; p.style.top = cy + 'px';
+    p.style.background = palette[Math.floor(Math.random() * palette.length)];
+    p.style.width = p.style.height = (3 + Math.random() * 4) + 'px';
+    p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 1000);
+  }
+  ship.classList.add('dying');
+  setTimeout(() => ship.remove(), 800);
+}
+
+// Spawn cadence: one ship every 3-7s
+function scheduleNextShip() {
+  setTimeout(() => { spawnShip(); scheduleNextShip(); }, 3000 + Math.random() * 4000);
+}
+spawnShip();        // first one immediately
+scheduleNextShip(); // then keep going
+</script>
+</body>
+</html>
