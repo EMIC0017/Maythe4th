@@ -947,6 +947,24 @@ const ART = {
     <text x="100" y="28" text-anchor="middle" fill="#FFE81F" font-family="Orbitron" font-size="12" letter-spacing="2">EPISODE TIMELINE</text>
   </svg>`,
 
+  deathStar: `<svg viewBox="0 0 140 140">
+    <circle cx="70" cy="70" r="60" fill="#888" stroke="#222" stroke-width="2"/>
+    <circle cx="48" cy="48" r="14" fill="#2a2a2a"/>
+    <circle cx="48" cy="48" r="6" fill="#0a0a0a"/>
+    <line x1="10" y1="70" x2="130" y2="70" stroke="#1a1a1a" stroke-width="1"/>
+    <line x1="14" y1="50" x2="126" y2="50" stroke="#2a2a2a" stroke-width=".7"/>
+    <line x1="14" y1="90" x2="126" y2="90" stroke="#2a2a2a" stroke-width=".7"/>
+  </svg>`,
+
+  instacart: `<svg viewBox="0 0 130 110">
+    <path d="M8 22 L22 22 L34 70 L108 70 L118 30 L36 30" stroke="#FF6900" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="44" cy="92" r="7" fill="none" stroke="#FF6900" stroke-width="2.5"/>
+    <circle cx="96" cy="92" r="7" fill="none" stroke="#FF6900" stroke-width="2.5"/>
+    <path d="M58 38 Q60 50 62 60 L72 60 Q74 50 76 38 Z" fill="#FF6900"/>
+    <path d="M62 32 Q64 36 66 38 M68 30 Q68 36 68 38 M74 32 Q72 36 70 38" stroke="#76FF03" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <text x="65" y="20" text-anchor="middle" fill="#FF6900" font-family="Orbitron" font-size="11" font-weight="900" letter-spacing="1">INSTACART</text>
+  </svg>`,
+
   grogu: `<svg viewBox="0 0 120 130">
     <ellipse cx="60" cy="115" rx="40" ry="10" fill="#3e2723" opacity=".5"/>
     <path d="M28 90 Q28 65 60 65 Q92 65 92 90 L92 118 L28 118 Z" fill="#a1887f"/>
@@ -1199,6 +1217,80 @@ const QUESTIONS = [
     options: ['Yellow (Jedi Sentinels / Temple Guards)', 'Black (Darksaber)', 'White', 'Orange'],
     correct: 0,
     note: 'Yellow — wielded by Jedi Sentinels and Temple Guards. The Darksaber is a unique Mandalorian weapon.'
+  },
+
+  /* ===== INSTACART TRIVIA ===== */
+  {
+    art: ART.instacart,
+    crawl: 'A startup that started in San Francisco changed grocery shopping forever.\nWhat year was Instacart founded?',
+    options: ['2008', '2010', '2012', '2014'],
+    correct: 2,
+    note: 'July 1, 2012 — by Apoorva Mehta with co-founders Max Mullen and Brandon Leonardo.'
+  },
+  {
+    art: ART.instacart,
+    crawl: 'Three co-founders started Instacart in 2012.\nWhich of these is NOT one of them?',
+    options: ['Apoorva Mehta', 'Max Mullen', 'Brandon Leonardo', 'Tony Xu'],
+    correct: 3,
+    note: 'Tony Xu founded DoorDash, not Instacart.'
+  },
+  {
+    art: ART.instacart,
+    crawl: 'Instacart has had a few people in the corner office.\nWhich of these has NEVER been CEO of Instacart?',
+    options: ['Apoorva Mehta', 'Fidji Simo', 'Chris Rogers', 'Travis Kalanick'],
+    correct: 3,
+    note: 'Travis Kalanick was a founder of Uber. Mehta (2012-2021) → Simo (2021-2025) → Rogers (current).'
+  },
+  {
+    art: ART.instacart,
+    crawl: 'Instacart\'s in-store smart shopping cart product was built\non technology from a 2021 acquisition. Which company?',
+    options: ['Caper AI', 'Eversight', 'FoodStorm', 'Unata'],
+    correct: 0,
+    note: 'Caper AI — the smart carts ("Caper Carts") use AI to detect items as shoppers add them.'
+  },
+  {
+    art: ART.instacart,
+    crawl: 'Instacart now has a whole portfolio of B2B products for retailers.\nWhich of these is NOT a real Instacart brand?',
+    options: ['Caper Carts', 'Carrot Ads', 'FoodStorm', 'ShopperLink'],
+    correct: 3,
+    note: 'ShopperLink is fictional. Caper Carts, Carrot Ads, FoodStorm, Eversight, and Carrot Tags are all real Instacart products.'
+  },
+
+  /* ===== MORE STAR WARS QUOTE ENDINGS + TRIVIA ===== */
+  {
+    art: ART.yoda,
+    crawl: 'The most famous farewell in the galaxy.\nFinish it: "May the Force be ____"',
+    options: ['"...with you"', '"...upon you"', '"...beside you"', '"...within you"'],
+    correct: 0,
+    note: '"May the Force be with you." — Said throughout every era of Star Wars.'
+  },
+  {
+    art: ART.vader,
+    crawl: 'Obi-Wan does a Jedi mind trick on the stormtroopers.\n"These aren\'t the ____ you\'re looking for."',
+    options: ['Jedi', 'droids', 'rebels', 'ships'],
+    correct: 1,
+    note: '"These aren\'t the droids you\'re looking for." — Obi-Wan Kenobi, A New Hope.'
+  },
+  {
+    art: ART.deathStar || ART.deathstar,
+    crawl: 'Princess Leia\'s holographic plea to a Jedi Master:\n"Help me, Obi-Wan Kenobi. You\'re my ____"',
+    options: ['"only chance"', '"final hope"', '"only hope"', '"last warrior"'],
+    correct: 2,
+    note: '"You\'re my only hope." — projected from R2-D2.'
+  },
+  {
+    art: ART.falcon,
+    crawl: 'About to be frozen in carbonite, Princess Leia confesses.\n"I love you." Han Solo replies: ____',
+    options: ['"I love you too."', '"I know."', '"As do I."', '"Always."'],
+    correct: 1,
+    note: '"I know." — Han Solo, The Empire Strikes Back. Famously improvised by Harrison Ford.'
+  },
+  {
+    art: ART.yoda,
+    crawl: 'The wise Jedi Master teaches a lesson about size.\n"Judge me by my size, ____?"',
+    options: ['"do you?"', '"would you?"', '"will you?"', '"can you?"'],
+    correct: 0,
+    note: 'Yoda — The Empire Strikes Back. A reminder that the Force is in all living things, regardless of stature.'
   }
 ];
 
