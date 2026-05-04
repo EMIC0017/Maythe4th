@@ -1475,77 +1475,95 @@ function scheduleIntroEnd() {
 }
 
 /* =============================================================
-   CENTRAL STORAGE — Firebase Realtime DB if configured,
+   CENTRAL STORAGE — JSONBin.io shared bin if configured,
    localStorage fallback otherwise.
-   To enable shared cross-device leaderboard, paste your Firebase
-   web config object into FIREBASE_CONFIG below. Setup:
-     1) console.firebase.google.com → Add project → name it
-     2) Enable Realtime Database (test mode, any region)
-     3) Project settings → Add web app → copy the config block
-     4) Paste here, set databaseURL if missing
+   To enable shared cross-device leaderboard:
+     1) jsonbin.io → sign up
+     2) API Keys → copy your X-Access-Key (or X-Master-Key)
+     3) Bins → Create Bin → start with {} → save → copy Bin ID
+     4) Paste both below
    ============================================================= */
-const FIREBASE_CONFIG = null; // paste your firebase config object here
+const JSONBIN_KEY = '$2a$10$7j4gvYURUVysQXTCFOkk4ON8v4N4nf2IXfAHLkp1mgMy03e.v8G9u'; // X-Access-Key
+const JSONBIN_ID  = '69f89cd0aaba8821976d0d7e';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b';
 
 const Storage = {
   scores: [], blasts: { light: 0, dark: 0 },
-  listeners: [], fb: null, ready: false,
+  listeners: [], ready: false, _pushTimer: null,
   init() {
     this.scores = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
     this.blasts = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
     this.notify();
-    if (FIREBASE_CONFIG) this.initFirebase();
-    else this.setStatus('offline', 'Local storage only — paste Firebase config in code for shared scoring');
+    if (JSONBIN_KEY && JSONBIN_ID) {
+      this.setStatus('online', 'Connected to shared leaderboard (JSONBin)');
+      this.pull();
+      setInterval(() => this.pull(), 7000);  // poll for other devices every 7s
+    } else {
+      this.setStatus('offline', 'Local storage only — paste JSONBin keys in code for shared scoring');
+    }
   },
   setStatus(cls, title) {
     const el = document.getElementById('t-status');
     if (el) { el.classList.remove('online', 'offline'); el.classList.add(cls); el.title = title; }
   },
-  initFirebase() {
-    const load = (src) => new Promise((res, rej) => {
-      const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-    Promise.all([
-      load('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js'),
-      load('https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js')
-    ]).then(() => {
-      try {
-        firebase.initializeApp(FIREBASE_CONFIG);
-        this.fb = firebase.database();
-        this.fb.ref('scores').on('value', snap => {
-          const v = snap.val() || {};
-          this.scores = Object.values(v);
-          localStorage.setItem('sw_leaderboard', JSON.stringify(this.scores));
-          this.notify();
-        });
-        this.fb.ref('blasts').on('value', snap => {
-          const v = snap.val() || {};
-          this.blasts = { light: v.light || 0, dark: v.dark || 0 };
-          localStorage.setItem('sw_easter_bonus', JSON.stringify(this.blasts));
-          this.notify();
-        });
-        this.ready = true;
-        this.setStatus('online', 'Connected to shared leaderboard');
-      } catch (e) {
-        console.warn('Firebase init failed:', e);
-        this.setStatus('offline', 'Firebase failed — local only');
-      }
-    }).catch(e => {
-      console.warn('Firebase SDK load failed:', e);
-      this.setStatus('offline', 'Firebase SDK unreachable — local only');
-    });
+  _scoreKey(s) { return `${s.ts}|${(s.name||'').toLowerCase()}|${s.side}`; },
+  _mergeRemote(remote) {
+    const remoteScores = (remote && remote.scores) || [];
+    const remoteBlasts = (remote && remote.blasts) || { light: 0, dark: 0 };
+    const seen = new Set(this.scores.map(s => this._scoreKey(s)));
+    remoteScores.forEach(s => { if (!seen.has(this._scoreKey(s))) this.scores.push(s); });
+    // Blasts: take max — avoids losing increments completely on race
+    this.blasts.light = Math.max(this.blasts.light || 0, remoteBlasts.light || 0);
+    this.blasts.dark  = Math.max(this.blasts.dark  || 0, remoteBlasts.dark  || 0);
+  },
+  async pull() {
+    try {
+      const r = await fetch(`${JSONBIN_BASE}/${JSONBIN_ID}/latest`, {
+        headers: { 'X-Access-Key': JSONBIN_KEY }
+      });
+      if (!r.ok) { this.setStatus('offline', `pull HTTP ${r.status}`); return; }
+      const data = await r.json();
+      this._mergeRemote(data.record);
+      localStorage.setItem('sw_leaderboard', JSON.stringify(this.scores));
+      localStorage.setItem('sw_easter_bonus', JSON.stringify(this.blasts));
+      this.setStatus('online', 'Connected (last sync: ' + new Date().toLocaleTimeString() + ')');
+      this.notify();
+    } catch (e) { this.setStatus('offline', 'pull failed: ' + e.message); }
+  },
+  async _doPush() {
+    try {
+      // GET-merge-PUT to minimise race window
+      const rr = await fetch(`${JSONBIN_BASE}/${JSONBIN_ID}/latest`, {
+        headers: { 'X-Access-Key': JSONBIN_KEY }
+      });
+      if (rr.ok) this._mergeRemote((await rr.json()).record);
+      const body = JSON.stringify({ scores: this.scores, blasts: this.blasts });
+      const pr = await fetch(`${JSONBIN_BASE}/${JSONBIN_ID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Key': JSONBIN_KEY },
+        body: body
+      });
+      if (!pr.ok) { this.setStatus('offline', `push HTTP ${pr.status}`); return; }
+      this.setStatus('online', 'Saved at ' + new Date().toLocaleTimeString());
+    } catch (e) { this.setStatus('offline', 'push failed: ' + e.message); }
+  },
+  schedulePush() {
+    if (!JSONBIN_KEY || !JSONBIN_ID) return;
+    clearTimeout(this._pushTimer);
+    // Debounce: collapse rapid blasts into one push 1.5s after last event
+    this._pushTimer = setTimeout(() => this._doPush(), 1500);
   },
   addScore(entry) {
     this.scores.push(entry);
     localStorage.setItem('sw_leaderboard', JSON.stringify(this.scores));
-    if (this.fb) this.fb.ref('scores').push(entry);
     this.notify();
+    if (JSONBIN_KEY && JSONBIN_ID) this._doPush();   // immediate, scores are rare
   },
   addBlast(side, pts) {
     this.blasts[side] = (this.blasts[side] || 0) + pts;
     localStorage.setItem('sw_easter_bonus', JSON.stringify(this.blasts));
-    if (this.fb) this.fb.ref('blasts/' + side).transaction(v => (v || 0) + pts);
     this.notify();
+    this.schedulePush();   // debounced — many blasts collapse to one PUT
   },
   totalFor(side) {
     const fromScores = this.scores.filter(s => s.side === side).reduce((a, e) => a + (e.score || 0), 0);
