@@ -1541,6 +1541,31 @@ function animateNumber(el, from, to, dur=600) {
 
 /* Initialize storage + ticker subscription */
 Storage.init();
+
+/* Direct deep-link to leaderboard via /leaderboard or #leaderboard */
+function maybeJumpToLeaderboard() {
+  const wantsLeader = (location.hash || '').toLowerCase().includes('leaderboard') ||
+                      (new URLSearchParams(location.search).get('view') || '').toLowerCase() === 'leaderboard';
+  if (wantsLeader) setTimeout(() => renderLeaderboard(), 50);
+}
+maybeJumpToLeaderboard();
+window.addEventListener('hashchange', maybeJumpToLeaderboard);
+
+/* Auto-refresh leaderboard every 15 seconds when it's visible
+   (covers cases where Firebase isn't connected or another tab updated localStorage) */
+setInterval(() => {
+  if (document.getElementById('screen-leader').classList.contains('active')) {
+    // Re-load from localStorage in case another tab wrote
+    const stored = JSON.parse(localStorage.getItem('sw_leaderboard') || '[]');
+    const blasts = JSON.parse(localStorage.getItem('sw_easter_bonus') || '{"light":0,"dark":0}');
+    if (JSON.stringify(stored) !== JSON.stringify(Storage.scores) ||
+        JSON.stringify(blasts) !== JSON.stringify(Storage.blasts)) {
+      Storage.scores = stored; Storage.blasts = blasts;
+      Storage.notify();
+    }
+    renderLeaderboard();
+  }
+}, 15000);
 let _prev = { light: 0, dark: 0 };
 Storage.subscribe(() => {
   const lt = Storage.totalFor('light'), dt = Storage.totalFor('dark');
