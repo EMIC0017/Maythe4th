@@ -1510,11 +1510,18 @@ const Storage = {
   _mergeRemote(remote) {
     const remoteScores = (remote && remote.scores) || [];
     const remoteBlasts = (remote && remote.blasts) || { light: 0, dark: 0 };
-    const seen = new Set(this.scores.map(s => this._scoreKey(s)));
-    remoteScores.forEach(s => { if (!seen.has(this._scoreKey(s))) this.scores.push(s); });
-    // Blasts: take max — avoids losing increments completely on race
-    this.blasts.light = Math.max(this.blasts.light || 0, remoteBlasts.light || 0);
-    this.blasts.dark  = Math.max(this.blasts.dark  || 0, remoteBlasts.dark  || 0);
+    // Remote is authoritative. Keep only LOCAL-only entries newer than 30s
+    // (in-flight writes that haven't been confirmed in remote yet).
+    const FRESH_MS = 30000;
+    const cutoff = Date.now() - FRESH_MS;
+    const remoteKeys = new Set(remoteScores.map(s => this._scoreKey(s)));
+    const localFresh = this.scores.filter(s =>
+      !remoteKeys.has(this._scoreKey(s)) && (s.ts || 0) > cutoff
+    );
+    this.scores = remoteScores.concat(localFresh);
+    // Blasts: trust remote (debounced push lands within 1.5s, well under 7s poll)
+    this.blasts.light = remoteBlasts.light || 0;
+    this.blasts.dark  = remoteBlasts.dark  || 0;
   },
   async pull() {
     try {
