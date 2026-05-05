@@ -501,6 +501,35 @@
   #contest-countdown.warn .cd-time { color: #ffaa00; text-shadow: 0 0 14px rgba(255,170,0,.6); }
   #contest-countdown.danger .cd-time { color: var(--sw-red); text-shadow: 0 0 14px rgba(255,61,0,.6); animation: pulseTime 1s infinite; }
   #contest-countdown.ended .cd-time { color: var(--sw-red); font-size: 20px; }
+
+  /* Galactic Stats Infographic */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-top: 14px;
+  }
+  @media (max-width: 720px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    text-align: center; padding: 14px 10px;
+    border: 1px solid #333; border-radius: 6px;
+    background: linear-gradient(180deg, rgba(20,20,30,.55), rgba(0,0,0,.85));
+    transition: transform .25s, border-color .25s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--sw-yellow); }
+  .stat-card.light { border-color: rgba(79,195,247,.45); }
+  .stat-card.light .stat-num { color: var(--sw-blue); text-shadow: 0 0 10px rgba(79,195,247,.5); }
+  .stat-card.dark  { border-color: rgba(255,61,0,.45); }
+  .stat-card.dark .stat-num { color: var(--sw-red); text-shadow: 0 0 10px rgba(255,61,0,.5); }
+  .stat-num {
+    font-family: 'Orbitron', sans-serif; font-weight: 900;
+    color: var(--sw-yellow); font-size: 22px;
+    text-shadow: 0 0 10px rgba(255,232,31,.45);
+    word-break: break-word; line-height: 1.1;
+  }
+  .stat-num small { font-size: 11px; font-weight: 500; color: #aaa; display: block; margin-top: 4px; letter-spacing: .15em; }
+  .stat-label {
+    margin-top: 6px; color: #888; font-size: 10px; letter-spacing: .2em;
+    text-transform: uppercase;
+  }
   @keyframes pulseTime { 0%,100% { opacity: 1 } 50% { opacity: .5 } }
   .center { text-align: center; margin-top: 22px; }
   .small { font-size: 12px; color: #777; }
@@ -752,9 +781,28 @@
     <div class="winner-banner" id="winner-banner">— No challengers yet —</div>
 
     <div id="contest-countdown">
-      <span class="cd-label">Contest ends in</span>
-      <span class="cd-time" id="cd-time">--:--:--</span>
-      <span class="cd-tz">PT</span>
+      <span class="cd-label">★ Final Tally ★</span>
+      <span class="cd-time" id="cd-time">CONTEST ENDED</span>
+    </div>
+
+    <!-- Galactic Stats Infographic -->
+    <div id="stats-panel" class="panel" style="margin-top: 22px;">
+      <h3 style="text-align:center;margin-top:0;letter-spacing:.18em">★ Galactic Hall of Records ★</h3>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-games">0</div><div class="stat-label">Games Played</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-players">0</div><div class="stat-label">Unique Champions</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Points Scored</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-avg">0</div><div class="stat-label">Avg Score / Game</div></div>
+        <div class="stat-card light"><div class="stat-num" id="stat-top-jedi">—</div><div class="stat-label">Highest Jedi</div></div>
+        <div class="stat-card dark"><div class="stat-num" id="stat-top-sith">—</div><div class="stat-label">Highest Sith</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-fastest">—</div><div class="stat-label">Speed Demon (s)</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-dedicated">—</div><div class="stat-label">Most Plays</div></div>
+        <div class="stat-card light"><div class="stat-num" id="stat-imp-down">0</div><div class="stat-label">Imperial Ships Down</div></div>
+        <div class="stat-card dark"><div class="stat-num" id="stat-reb-down">0</div><div class="stat-label">Rebel Ships Down</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-bonus">0</div><div class="stat-label">Avg Speed Bonus %</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-perfect">0</div><div class="stat-label">Perfect Runs (10/10)</div></div>
+      </div>
+      <p class="pun" style="margin-top:18px">"In my experience there's no such thing as luck."</p>
     </div>
 
     <div class="leader-grid">
@@ -1630,35 +1678,16 @@ function maybeJumpToLeaderboard() {
 maybeJumpToLeaderboard();
 window.addEventListener('hashchange', maybeJumpToLeaderboard);
 
-/* Contest countdown to 4:00 PM PT today */
+/* Contest countdown — frozen at "CONTEST ENDED" */
 function tickCountdown() {
   const el = document.getElementById('cd-time');
   const wrap = document.getElementById('contest-countdown');
   if (!el || !wrap) return;
-  const now = new Date();
-  // Today's date in Pacific Time (handles late-night user opens correctly)
-  const ptDate = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(now);
-  // 4 PM Pacific — May = PDT = -07:00
-  const target = new Date(`${ptDate}T16:00:00-07:00`);
-  const ms = target.getTime() - now.getTime();
-  wrap.classList.remove('warn', 'danger', 'ended');
-  if (ms <= 0) {
-    el.textContent = 'CONTEST ENDED';
-    wrap.classList.add('ended');
-    return;
-  }
-  const h = Math.floor(ms / 3600000);
-  const m = Math.floor((ms % 3600000) / 60000);
-  const s = Math.floor((ms % 60000) / 1000);
-  el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if (ms < 600000) wrap.classList.add('danger');         // < 10 min
-  else if (ms < 3600000) wrap.classList.add('warn');     // < 1 hour
+  el.textContent = 'CONTEST ENDED';
+  wrap.classList.remove('warn', 'danger');
+  wrap.classList.add('ended');
 }
 tickCountdown();
-setInterval(tickCountdown, 1000);
 
 /* Auto-refresh leaderboard every 15 seconds when it's visible.
    With JSONBin configured, the 7s pull already covers updates;
@@ -1959,6 +1988,63 @@ function renderLeaderboard() {
   else if (totalDark > totalLight) banner = '☠ The Dark Side Reigns ☠';
   else banner = '⚔ Balance in the Force ⚔';
   $('winner-banner').textContent = banner;
+  renderStats(light, dark);
+}
+
+/* Compute and render the Galactic Stats infographic */
+function renderStats(lightAgg, darkAgg) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+  const all = Storage.scores.slice();
+  const allAgg = lightAgg.concat(darkAgg);
+  const games   = all.length;
+  const players = allAgg.length;
+  const total   = allAgg.reduce((s, p) => s + (p.score || 0), 0);
+  const avg     = games ? Math.round(total / games) : 0;
+
+  // Top per side (highest single best run)
+  const topJedi = lightAgg.slice().sort((a,b) => b.bestScore - a.bestScore)[0];
+  const topSith = darkAgg.slice().sort((a,b) => b.bestScore - a.bestScore)[0];
+
+  // Speed Demon: fastest BEST time among players who scored ≥ a meaningful threshold
+  const candidates = allAgg.filter(p => p.bestScore >= 1000 && p.bestTime !== Infinity && p.bestTime > 0);
+  const fastest = candidates.slice().sort((a,b) => a.bestTime - b.bestTime)[0];
+
+  // Most plays — most dedicated player
+  const dedicated = allAgg.slice().sort((a,b) => b.plays - a.plays)[0];
+
+  // Ship blasts — Light side blasts = Imperial ships destroyed; Dark blasts = Rebel ships destroyed
+  const impDown = (Storage.blasts && Storage.blasts.light) || 0;
+  const rebDown = (Storage.blasts && Storage.blasts.dark)  || 0;
+
+  // Speed bonus %: average over runs that earned a bonus
+  const withBonus = all.filter(s => (s.speedBonus || 0) > 0 && (s.baseScore || 0) > 0);
+  const avgBonusPct = withBonus.length
+      ? Math.round(withBonus.reduce((acc, s) => acc + (100 * s.speedBonus / s.baseScore), 0) / withBonus.length)
+      : 0;
+
+  // Perfect runs: 10/10 correct
+  const perfect = all.filter(s => (s.correct || 0) >= 10).length;
+
+  set('stat-games',    games.toLocaleString());
+  set('stat-players',  players.toLocaleString());
+  set('stat-total',    total.toLocaleString());
+  set('stat-avg',      avg.toLocaleString());
+  set('stat-top-jedi', topJedi
+      ? `${escapeHtml(topJedi.name)}<small>${(topJedi.bestScore||0).toLocaleString()} pts</small>`
+      : '—');
+  set('stat-top-sith', topSith
+      ? `${escapeHtml(topSith.name)}<small>${(topSith.bestScore||0).toLocaleString()} pts</small>`
+      : '—');
+  set('stat-fastest',  fastest
+      ? `${escapeHtml(fastest.name)}<small>${fastest.bestTime}s</small>`
+      : '—');
+  set('stat-dedicated', dedicated && dedicated.plays > 1
+      ? `${escapeHtml(dedicated.name)}<small>×${dedicated.plays} runs</small>`
+      : '—');
+  set('stat-imp-down', impDown.toLocaleString() + '<small>pts to Light</small>');
+  set('stat-reb-down', rebDown.toLocaleString() + '<small>pts to Dark</small>');
+  set('stat-bonus',    (avgBonusPct ? avgBonusPct + '%' : '—'));
+  set('stat-perfect',  perfect.toLocaleString());
 }
 function sortBy(a, b) {
   if (b.score !== a.score) return b.score - a.score;
